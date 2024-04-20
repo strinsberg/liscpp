@@ -1,0 +1,30 @@
+{:tasks {:requires ([babashka.fs :as fs])
+
+         build:release
+         {:doc "Create a release build."
+          :task (do (when-not (fs/exists? "build") (fs/create-dir "build"))
+                    (shell "cmake -S . -B build/ -D CMAKE_BUILD_TYPE=Release")
+                    (shell "cmake --build build/"))}
+
+         build:debug
+         {:doc "Create a debug build."
+          :task (do (when-not (fs/exists? "build") (fs/create-dir "build"))
+                    (shell "cmake -S . -B build/ -D CMAKE_BUILD_TYPE=Debug")
+                    (shell "cmake --build build/"))}
+
+         test {:doc "Build and run tests."
+               :task (do (run 'build:debug)
+                         (shell "./build/bin/test_liscpp --gtest_color=yes"))}
+
+         ctest:release
+         {:doc "Build and run tests on release build, with ctest."
+          :task (do (run 'build:release) (shell {:dir "build"} "ctest"))}
+
+         ctest:debug {:doc "Build and run tests on debug build, with ctest."
+                      :task (do (run 'build:debug)
+                                (shell {:dir "build"} "ctest"))}
+
+         clean {:doc "Remove the build directory."
+                :task (do (println "Removing build...")
+                          (fs/delete-tree "build")
+                          (fs/create-dir "build"))}}}
