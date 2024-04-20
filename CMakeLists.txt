@@ -35,6 +35,8 @@ enable_testing()
 add_executable(test_${PROJECT_NAME} ${LISCPP_TESTS})
 target_link_libraries(test_${PROJECT_NAME} ${PROJECT_NAME})
 target_link_libraries(test_${PROJECT_NAME} gtest gmock gtest_main)
+target_link_libraries(test_${PROJECT_NAME} ${CMAKE_BINARY_DIR}/libgccpp.a)
+target_link_libraries(test_${PROJECT_NAME} ${CMAKE_BINARY_DIR}/libgc.a)
 set_target_properties(test_${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_test(NAME ${PROJECT_NAME} COMMAND test_${PROJECT_NAME})
