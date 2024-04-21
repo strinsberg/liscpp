@@ -1,4 +1,5 @@
 #include "core.h"
+#include "fn.h"
 #include "value.h"
 #include <gtest/gtest.h>
 

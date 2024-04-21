@@ -1,7 +1,9 @@
 #include "core.h"
+#include "fn.h"
+#include "error.h"
 #include "value.h"
 
-// General ////////////////////////////////////////////////////////////////////
+// Compiler Use ///////////////////////////////////////////////////////////////
 
 Value __core__::apply_fn(Value fn, const Value args[], uint32_t n) {
   if (fn.is_fn()) {

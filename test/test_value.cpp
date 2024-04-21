@@ -1,9 +1,12 @@
 #include "value.h"
 #include <gtest/gtest.h>
 
+// Test function(s) to pass to Values where needed
 Value __test_fn__() {
   return Value(); 
 }
+
+// Value Tests ////////////////////////////////////////////////////////////////
 
 TEST(ValueTypes, does_it_set_its_types) {
   Value i = Value::Int(42);
