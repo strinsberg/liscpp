@@ -22,9 +22,4 @@
 
          ctest:debug {:doc "Build and run tests on debug build, with ctest."
                       :task (do (run 'build:debug)
-                                (shell {:dir "build"} "ctest"))}
-
-         clean {:doc "Remove the build directory."
-                :task (do (println "Removing build...")
-                          (fs/delete-tree "build")
-                          (fs/create-dir "build"))}}}
+                                (shell {:dir "build"} "ctest"))}}}
