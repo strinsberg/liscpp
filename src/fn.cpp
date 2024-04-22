@@ -1,8 +1,30 @@
 #include "fn.h"
 #include "error.h"
 #include "value.h"
+#include <cstdint>
+#include <format>
 
-// TODO these may not have user friendly errors yet
+uint32_t Fn::min_args() const {
+  switch (m_type) {
+  case FnType::Fn0:
+    return 0;
+  case FnType::Fn1:
+    return 1;
+  case FnType::Fn2:
+    return 2;
+  case FnType::Fn3:
+    return 3;
+  case FnType::Fn4:
+    return 4;
+  case FnType::Fn5:
+    return 5;
+  case FnType::FnAny:
+    return 0;
+  default:
+    throw Panic(std::format("Fn::operator== encountered uncovered type {}",
+                            int(m_type)));
+  }
+}
 
 Value Fn::operator()(const Value args[], uint32_t n) {
   switch (m_type) {
@@ -32,15 +54,13 @@ Value Fn::operator()(const Value args[], uint32_t n) {
     break;
   case FnType::FnAny:
     return m_fn.fn_any(args, n);
+  default:
+    throw Panic(
+        std::format("Fn::apply encountered uncovered type {}", int(m_type)));
   }
 
-  // TODO I should probably deal with this in apply to give a better error.
-  // If the outer functions do the job this could be impossible to run into
-  // here.
-  // Or this function needs to deal with the error in a way that makes it
-  // easy for the user to see, perhaps with extra function information and
-  // the rep for functions being defined for Fn and just used for Value.
-  throw Error("Function application error", Value(this));
+  // TODO use function name when Fn has more fields
+  throw ArityError("anonymous", min_args(), n);
 }
 
 bool Fn::operator==(const Fn &other) const {
@@ -60,6 +80,7 @@ bool Fn::operator==(const Fn &other) const {
   case FnType::FnAny:
     return other.m_type == FnType::FnAny and m_fn.fn_any == other.m_fn.fn_any;
   default:
-    return false;
+    throw Panic(std::format("Fn::operator== encountered uncovered type {}",
+                            int(m_type)));
   }
 }

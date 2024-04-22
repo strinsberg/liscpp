@@ -4,6 +4,8 @@
 #include "value.h"
 #include <cstdint>
 
+// TODO the fn class should take more information than just the fn
+
 enum class FnType {
   Fn0,
   Fn1,
@@ -43,6 +45,7 @@ public:
       : m_type{FnType::Fn5}, m_fn{f} {}
   Fn(Value (*f)(const Value[], uint32_t)) : m_type{FnType::FnAny}, m_fn{f} {}
 
+  uint32_t min_args() const;
   Value operator()(const Value[], uint32_t n);
   bool operator==(const Fn &other) const;
 

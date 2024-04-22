@@ -11,7 +11,10 @@ Value __core__::apply_fn(Value fn, const Value args[], uint32_t n) {
     Fn f = *fn.as_fn();
     return f(args, n);
   } else {
-    throw Error("cannot apply as a function", fn); // TODO fix using value rep
+    // TODO might be better with a custom error to indicate that the first arg
+    // of a function application was not a function specifically.
+    throw InvalidArgError("function application", "Function", fn.type_string(),
+                          0, fn);
   }
 }
 
@@ -24,33 +27,36 @@ Value __core__::sum(const Value args[], uint32_t n) {
   bool is_double = false;
 
   for (uint32_t i = 0; i < n; ++i) {
-    if (args[i].is_flt()) {
+    switch (args[i].get_type()) {
+    case ValType::Flt:
       if (!is_double) {
         is_double = true;
         y = double(x);
       }
       y = y + args[i].as_flt();
-
-    } else if (args[i].is_int()) {
+      break;
+    case ValType::Int:
       if (is_double) {
         y = y + args[i].as_int();
       } else {
         x = x + args[i].as_int();
       }
-
-    } else {
-      throw Error("arguments to sum must be numbers", args[i]);
+      break;
+    default:
+      throw InvalidArgError("+", "Number", args[i].type_string(), i, args[i]);
     }
   }
 
   return is_double ? Value(y) : Value::Int(x);
 }
 
-// Comparisson ////////////////////////////////////////////////////////////////
+// Comparisson
+// ////////////////////////////////////////////////////////////////
 
+// Use value operator== for deep equality
 Value __core__::equal(const Value args[], uint32_t n) {
   if (n == 0)
-    return Value::False();
+    throw ArityError("=", 1, 0);
   else if (n == 1)
     return Value::True();
 

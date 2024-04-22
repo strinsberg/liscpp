@@ -76,29 +76,34 @@ public:
   inline bool is_bool() const { return m_type == ValType::Bool; }
   inline bool is_int() const { return m_type == ValType::Int; }
   inline bool is_flt() const { return m_type == ValType::Flt; }
+  inline bool is_key() const { return m_type == ValType::Key; }
   inline bool is_str() const { return m_type == ValType::Str; }
   inline bool is_fn() const { return m_type == ValType::Fn; }
   inline bool is_err() const { return m_type == ValType::Err; }
 
-  // accessors
-  // unsafe
+  // unsafe accessors
   inline bool as_bool() const { return m_val.b; }
   inline int64_t as_int() const { return m_val.i; }
   inline double as_flt() const { return m_val.d; }
+  inline const std::string& as_key() const { return *m_val.s; }
+  // TODO if a value is immutable these should return const&
   inline std::string *as_str() const { return m_val.s; }
   inline Fn *as_fn() const { return m_val.f; }
   inline Error *as_error() const { return m_val.e; }
-  // safe
+
+  // safe accessors
   ValType get_type() const { return m_type; }
   bool get_bool() const;
   int64_t get_int() const;
   double get_flt() const;
+  const std::string& get_key() const;
   std::string *get_str() const;
   Fn *get_fn() const;
   Error *get_error() const;
 
-  // Checks
+  // util
   bool is_truthy() const;
+  const std::string type_string() const;
 
   // Overloads
   bool operator==(const Value &other) const;

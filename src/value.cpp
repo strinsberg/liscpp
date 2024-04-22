@@ -2,6 +2,8 @@
 #include "error.h"
 #include "fn.h"
 #include <cstdint>
+#include <format>
+#include <stdexcept>
 
 // Constructors ///////////////////////////////////////////////////////////////
 
@@ -32,7 +34,6 @@ Value Value::False() { return Value(false); }
 
 Value Value::Int(int64_t i) { return Value(i); }
 
-// Will probably eventually just take an int or pointer to share strings
 Value Value::Key(const std::string &s) {
   Value v;
   v.m_type = ValType::Key;
@@ -54,68 +55,113 @@ Value Value::Str(const std::string &s) {
 
 // Type Methods //////////////////////////////////////////////////////////////
 
-// TODO these errors might also not be the best. It may be easier to do the
-// checks in the core functions so that one can say things like
-// "cannot apply: <value-rep>" without having to catch this error. Though it
-// seems better to catch this error. The question might be whether we need to
-// throw a proper lisp error or a C++ error just to indicate an error.
+// TODO where are these used? in compiled code? There errors should be panics
+// that cannot be recovered from as if bad access occurs it is a compiler or
+// lib error. All hand coded uses of values will manually check types and
+// access to reduce double checking for types. Though it may be best to add
+// the panic and always use these for safety.
+
 bool Value::get_bool() const {
   if (is_bool())
     return m_val.b;
-  throw Error("Not a bool", *this);
+  throw Panic(std::format("attempt to access Value as Bool: Actual type is {}",
+                          type_string()));
 }
 
 int64_t Value::get_int() const {
   if (is_int())
     return m_val.i;
-  throw Error("Not an int", *this);
+  throw Panic(std::format(
+      "attempt to access Value as Integer: Actual type is {}", type_string()));
 }
 
 double Value::get_flt() const {
   if (is_flt())
     return m_val.d;
-  throw Error("Not a float", *this);
+  throw Panic(std::format("attempt to access Value as Float: Actual type is {}",
+                          type_string()));
+}
+
+const std::string &Value::get_key() const {
+  if (is_key())
+    return *m_val.s;
+  throw Panic(std::format(
+      "attempt to access Value as Keyword: Actual type is {}", type_string()));
 }
 
 std::string *Value::get_str() const {
   if (is_str())
     return m_val.s;
-  throw Error("Not a string", *this);
+  throw Panic(std::format(
+      "attempt to access Value as String: Actual type is {}", type_string()));
 }
 
 Fn *Value::get_fn() const {
   if (is_fn())
     return m_val.f;
-  throw Error("not a function", *this);
+  throw Panic(std::format(
+      "attempt to access Value as Function: Actual type is {}", type_string()));
 }
 
 Error *Value::get_error() const {
   if (is_err())
     return m_val.e;
-  throw Error("Not an error", *this);
+  throw Panic(std::format("attempt to access Value as Error: Actual type is {}",
+                          type_string()));
 }
 
-// Checks /////////////////////////////////////////////////////////////////////
+// Util ///////////////////////////////////////////////////////////////////////
 
 bool Value::is_truthy() const {
   return !(is_nil() or (is_bool() and !as_bool()));
 }
 
+const std::string Value::type_string() const {
+  switch (m_type) {
+  case ValType::Nil:
+    return "Nil";
+  case ValType::Bool:
+    return "Bool";
+  case ValType::Int:
+    return "Integer";
+  case ValType::Flt:
+    return "Float";
+  case ValType::Key:
+    return "Keyword";
+  case ValType::Str:
+    return "String";
+  case ValType::Fn:
+    return "Function";
+  case ValType::Err:
+    return "Error";
+  }
+  throw Panic(std::format("value::type_string encountered uncovered type {}",
+                          int(m_type)));
+}
+
 // Overloads //////////////////////////////////////////////////////////////////
 
+// NOTE these need to be deep equality, not just pointer comparissons
 bool Value::operator==(const Value &other) const {
   switch (m_type) {
+  case ValType::Nil:
+    return other.is_nil();
   case ValType::Bool:
     return other.is_bool() and as_bool() == other.as_bool();
   case ValType::Int:
     return other.is_int() and as_int() == other.as_int();
+  case ValType::Flt:
+    return other.is_flt() and as_flt() == other.as_flt();
+  case ValType::Key:
+    return other.is_key() and as_key() == other.as_key();
   case ValType::Str:
-    return other.is_str() and as_str() == other.as_str();
+    return other.is_str() and *as_str() == *other.as_str();
   case ValType::Fn:
-    return other.is_fn() and as_fn() == other.as_fn();
+    return other.is_fn() and *as_fn() == *other.as_fn();
   case ValType::Err:
+    // TODO this is shallow eq for errors
     return other.is_err() and as_error() == other.as_error();
-  default:
-    return false;
   }
+  throw Panic(std::format("value::operator== encountered uncovered type {}",
+                          int(m_type)));
 }
