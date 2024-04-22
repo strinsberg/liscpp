@@ -27,6 +27,7 @@ public:
         Value type = Value::Key(":error"));
   virtual ~Error(){};
   const char *what() const throw();
+  bool operator==(const Error& other) const;
 
 protected:
   std::string m_message;

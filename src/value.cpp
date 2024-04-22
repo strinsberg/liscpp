@@ -159,8 +159,7 @@ bool Value::operator==(const Value &other) const {
   case ValType::Fn:
     return other.is_fn() and *as_fn() == *other.as_fn();
   case ValType::Err:
-    // TODO this is shallow eq for errors
-    return other.is_err() and as_error() == other.as_error();
+    return other.is_err() and *as_error() == *other.as_error();
   }
   throw Panic(std::format("value::operator== encountered uncovered type {}",
                           int(m_type)));

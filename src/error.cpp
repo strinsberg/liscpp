@@ -13,6 +13,11 @@ const char *Error::what() const throw() {
   return m_message.c_str(); // TODO also some rep of data
 }
 
+bool Error::operator==(const Error &other) const {
+  return m_type == other.m_type and m_message == other.m_message and
+         m_data == other.m_data;
+}
+
 ArityError::ArityError(const std::string &fn_name, uint32_t expected,
                        uint32_t given)
     : Error(std::format("Arity Error: {} expects at least {} args: Got {}",

@@ -20,6 +20,7 @@ Value __core__::apply_fn(Value fn, const Value args[], uint32_t n) {
 
 // Arithmetic /////////////////////////////////////////////////////////////////
 
+// Core function for +
 Value __core__::sum(const Value args[], uint32_t n) {
   // Keep checks and conversions to a minimum to allow faster computation.
   int64_t x = 0;
@@ -50,10 +51,10 @@ Value __core__::sum(const Value args[], uint32_t n) {
   return is_double ? Value(y) : Value::Int(x);
 }
 
-// Comparisson
-// ////////////////////////////////////////////////////////////////
+// Comparisson ////////////////////////////////////////////////////////////////
 
-// Use value operator== for deep equality
+// Core function for =
+// Uses value operator== for deep equality
 Value __core__::equal(const Value args[], uint32_t n) {
   if (n == 0)
     throw ArityError("=", 1, 0);

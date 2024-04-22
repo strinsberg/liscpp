@@ -107,6 +107,7 @@ public:
 
   // Overloads
   bool operator==(const Value &other) const;
+  bool operator!=(const Value &other) const { return !(*this == other); }
 
 private:
   ValType m_type;
