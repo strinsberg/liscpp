@@ -23,11 +23,13 @@ Value apply_fn(Value, const Value args[], uint32_t n);
 
 // internal functions for function values
 Value sum(const Value args[], uint32_t n);
+Value equal(const Value args[], uint32_t n);
 
 } // namespace __core__
 
 // Arithmetic /////////////////////////////////////////////////////////////////
 
 const Value _plus_ = Value(__core__::sum);
+const Value _equal_ = Value(__core__::equal);
 
 #endif

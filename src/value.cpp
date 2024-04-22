@@ -26,6 +26,10 @@ Value::Value(Value (*f)(const Value[], uint32_t))
 
 // Static Method Constructors /////////////////////////////////////////////////
 
+Value Value::True() { return Value(true); }
+
+Value Value::False() { return Value(false); }
+
 Value Value::Int(int64_t i) { return Value(i); }
 
 // Will probably eventually just take an int or pointer to share strings
@@ -55,13 +59,19 @@ Value Value::Str(const std::string &s) {
 // "cannot apply: <value-rep>" without having to catch this error. Though it
 // seems better to catch this error. The question might be whether we need to
 // throw a proper lisp error or a C++ error just to indicate an error.
+bool Value::get_bool() const {
+  if (is_bool())
+    return m_val.b;
+  throw Error("Not a bool", *this);
+}
+
 int64_t Value::get_int() const {
   if (is_int())
     return m_val.i;
   throw Error("Not an int", *this);
 }
 
-int64_t Value::get_flt() const {
+double Value::get_flt() const {
   if (is_flt())
     return m_val.d;
   throw Error("Not a float", *this);
@@ -85,10 +95,18 @@ Error *Value::get_error() const {
   throw Error("Not an error", *this);
 }
 
+// Checks /////////////////////////////////////////////////////////////////////
+
+bool Value::is_truthy() const {
+  return !(is_nil() or (is_bool() and !as_bool()));
+}
+
 // Overloads //////////////////////////////////////////////////////////////////
 
 bool Value::operator==(const Value &other) const {
   switch (m_type) {
+  case ValType::Bool:
+    return other.is_bool() and as_bool() == other.as_bool();
   case ValType::Int:
     return other.is_int() and as_int() == other.as_int();
   case ValType::Str:

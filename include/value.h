@@ -18,6 +18,7 @@ class Error;
 
 enum class ValType {
   Nil,
+  Bool,
   Int,
   Flt,
   Key,
@@ -28,12 +29,14 @@ enum class ValType {
 
 union ValUnion {
   ValUnion() : i{0} {}
+  ValUnion(bool b) : b{b} {}
   ValUnion(int64_t i) : i{i} {}
   ValUnion(double d) : d{d} {}
   ValUnion(std::string *s) : s{s} {}
   ValUnion(Fn *f) : f{f} {}
   ValUnion(Error *e) : e{e} {}
 
+  bool b;
   int64_t i;
   double d;
   std::string *s;
@@ -45,6 +48,7 @@ class Value {
 public:
   // type constructors
   Value() : m_type{ValType::Nil}, m_val{} {}
+  Value(bool b) : m_type{ValType::Bool}, m_val{b} {}
   Value(int64_t i) : m_type{ValType::Int}, m_val{i} {}
   Value(double d) : m_type{ValType::Flt}, m_val{d} {}
   Value(std::string *s) : m_type{ValType::Str}, m_val{s} {}
@@ -61,12 +65,15 @@ public:
   Value(Value (*f)(const Value[], uint32_t));
 
   // Static type constructor methods
+  static Value True();
+  static Value False();
   static Value Int(int64_t);
   static Value Key(const std::string&);
   static Value Str(const std::string&);
 
   // predicates
   inline bool is_nil() const { return m_type == ValType::Nil; }
+  inline bool is_bool() const { return m_type == ValType::Bool; }
   inline bool is_int() const { return m_type == ValType::Int; }
   inline bool is_flt() const { return m_type == ValType::Flt; }
   inline bool is_str() const { return m_type == ValType::Str; }
@@ -75,6 +82,7 @@ public:
 
   // accessors
   // unsafe
+  inline bool as_bool() const { return m_val.b; }
   inline int64_t as_int() const { return m_val.i; }
   inline double as_flt() const { return m_val.d; }
   inline std::string *as_str() const { return m_val.s; }
@@ -82,11 +90,15 @@ public:
   inline Error *as_error() const { return m_val.e; }
   // safe
   ValType get_type() const { return m_type; }
+  bool get_bool() const;
   int64_t get_int() const;
-  int64_t get_flt() const;
+  double get_flt() const;
   std::string *get_str() const;
   Fn *get_fn() const;
   Error *get_error() const;
+
+  // Checks
+  bool is_truthy() const;
 
   // Overloads
   bool operator==(const Value &other) const;
