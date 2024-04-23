@@ -27,7 +27,9 @@ public:
         Value type = Value::Key(":error"));
   virtual ~Error(){};
   const char *what() const throw();
-  bool operator==(const Error& other) const;
+  inline Value get_type() const { return m_type; }
+  inline Value get_data() const { return m_data; }
+  bool operator==(const Error &other) const;
 
 protected:
   std::string m_message;
@@ -44,6 +46,17 @@ class InvalidArgError : public Error {
 public:
   InvalidArgError(const std::string &fn_name, const std::string &expected,
                   const std::string &given, uint32_t pos, Value data);
+};
+
+class IoError : public Error {
+public:
+  IoError(const std::string &message, Value data);
+};
+
+class FileError : public Error {
+public:
+  FileError(const std::string &filename, const std::string &operation,
+            const std::string &what);
 };
 
 #endif

@@ -32,3 +32,12 @@ InvalidArgError::InvalidArgError(const std::string &fn_name,
                 "Invalid Argument Error: {} expects {} at position {}: Got {}",
                 fn_name, pos, expected, given),
             Value::Key(":invalid-argument"), data) {}
+
+FileError::FileError(const std::string &filename, const std::string &operation,
+                     const std::string &what)
+    : Error(std::format("File Error: error {} file \"{}\": {}", filename,
+                        operation, what),
+            Value::Key(":file"), Value()) {}
+
+IoError::IoError(const std::string &message, Value stream)
+    : Error(std::format("Io Error: {}", message), Value::Key(":io"), stream) {}
