@@ -1,4 +1,5 @@
 #include "value.h"
+#include "fn.h"
 #include <gtest/gtest.h>
 
 // Test function(s) to pass to Values where needed
@@ -13,7 +14,7 @@ TEST(ValueTypes, does_it_set_its_types) {
   Value d = Value{0.34};
   Value k = Value::Key(":key");
   Value s = Value::Str("just a string");
-  Value f = Value{__test_fn__};
+  Value f = Value{new Fn(__test_fn__)};
 
   EXPECT_EQ(i.get_type(), ValType::Int);
   EXPECT_EQ(d.get_type(), ValType::Flt);

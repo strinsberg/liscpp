@@ -3,64 +3,34 @@
 #include "value.h"
 #include <cstdint>
 #include <format>
-
-uint32_t Fn::min_args() const {
-  switch (m_type) {
-  case FnType::Fn0:
-    return 0;
-  case FnType::Fn1:
-    return 1;
-  case FnType::Fn2:
-    return 2;
-  case FnType::Fn3:
-    return 3;
-  case FnType::Fn4:
-    return 4;
-  case FnType::Fn5:
-    return 5;
-  case FnType::FnAny:
-    return 0;
-  default:
-    throw Panic(std::format("Fn::operator== encountered uncovered type {}",
-                            int(m_type)));
-  }
-}
+#include <stdexcept>
 
 Value Fn::operator()(const Value args[], uint32_t n) {
+  if (n < m_arity)
+    throw std::out_of_range(std::format(
+        "must have at least m_arity number or arguments: Expected {}: Got {}",
+        m_arity, n));
+
   switch (m_type) {
   case FnType::Fn0:
-    if (n >= 0) // TODO should calling a function with too many args error?
-      return m_fn.fn0();
-    break;
+    return m_fn.fn0();
   case FnType::Fn1:
-    if (n >= 1)
-      return m_fn.fn1(args[0]);
-    break;
+    return m_fn.fn1(args[0]);
   case FnType::Fn2:
-    if (n >= 2)
-      return m_fn.fn2(args[0], args[1]);
-    break;
+    return m_fn.fn2(args[0], args[1]);
   case FnType::Fn3:
-    if (n >= 3)
-      return m_fn.fn3(args[0], args[1], args[2]);
-    break;
+    return m_fn.fn3(args[0], args[1], args[2]);
   case FnType::Fn4:
-    if (n >= 4)
-      return m_fn.fn4(args[0], args[1], args[2], args[3]);
-    break;
+    return m_fn.fn4(args[0], args[1], args[2], args[3]);
   case FnType::Fn5:
-    if (n >= 5)
-      return m_fn.fn5(args[0], args[1], args[2], args[3], args[4]);
-    break;
+    return m_fn.fn5(args[0], args[1], args[2], args[3], args[4]);
   case FnType::FnAny:
     return m_fn.fn_any(args, n);
   default:
-    throw Panic(
-        std::format("Fn::apply encountered uncovered type {}", int(m_type)));
+    throw std::invalid_argument(std::format(
+        "Fn::operator() encountered uncovered type: Got type (as int) {}",
+        int(m_type)));
   }
-
-  // TODO use function name when Fn has more fields
-  throw ArityError("anonymous", min_args(), n);
 }
 
 bool Fn::operator==(const Fn &other) const {
@@ -80,7 +50,8 @@ bool Fn::operator==(const Fn &other) const {
   case FnType::FnAny:
     return other.m_type == FnType::FnAny and m_fn.fn_any == other.m_fn.fn_any;
   default:
-    throw Panic(std::format("Fn::operator== encountered uncovered type {}",
-                            int(m_type)));
+    throw std::invalid_argument(std::format(
+        "Fn::operator== encountered uncovered type: Got type (as int) {}",
+        int(m_type)));
   }
 }

@@ -2,6 +2,7 @@
 #define LISCPP_CORE_H
 
 #include "value.h"
+#include "fn.h"
 
 /* Core functions and values for lscpp that are not compiler macros
  *
@@ -29,7 +30,7 @@ Value equal(const Value args[], uint32_t n);
 
 // Arithmetic /////////////////////////////////////////////////////////////////
 
-const Value _plus_ = Value(__core__::sum);
-const Value _equal_ = Value(__core__::equal);
+const Value _plus_ = Value(new Fn("+", 0, __core__::sum));
+const Value _equal_ = Value(new Fn("=", 1, __core__::equal));
 
 #endif

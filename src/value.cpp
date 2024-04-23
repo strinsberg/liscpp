@@ -6,27 +6,6 @@
 #include <iomanip>
 #include <stdexcept>
 
-// Constructors ///////////////////////////////////////////////////////////////
-
-Value::Value(Value (*f)()) : m_type{ValType::Fn}, m_val{new Fn(f)} {}
-
-Value::Value(Value (*f)(Value)) : m_type{ValType::Fn}, m_val{new Fn(f)} {}
-
-Value::Value(Value (*f)(Value, Value))
-    : m_type{ValType::Fn}, m_val{new Fn(f)} {}
-
-Value::Value(Value (*f)(Value, Value, Value))
-    : m_type{ValType::Fn}, m_val{new Fn(f)} {}
-
-Value::Value(Value (*f)(Value, Value, Value, Value))
-    : m_type{ValType::Fn}, m_val{new Fn(f)} {}
-
-Value::Value(Value (*f)(Value, Value, Value, Value, Value))
-    : m_type{ValType::Fn}, m_val{new Fn(f)} {}
-
-Value::Value(Value (*f)(const Value[], uint32_t))
-    : m_type{ValType::Fn}, m_val{new Fn(f)} {}
-
 // Static Method Constructors /////////////////////////////////////////////////
 
 Value Value::True() { return Value(true); }

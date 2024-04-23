@@ -1,5 +1,6 @@
 #include "mod_io.h"
 #include "stream.h"
+#include "fn.h"
 #include <error.h>
 
 ModIo *ModIo::m_mod = nullptr;
@@ -18,7 +19,7 @@ ModIo *ModIo::require() {
 // code to be written outside of functions that code would be executed on
 // the first require inside this function.
 void ModIo::init() {
-  getline = Value(__mod_io__::getline);
+  getline = Value{new Fn{__mod_io__::getline}};
 }
 
 // Function definitions ///////////////////////////////////////////////////////

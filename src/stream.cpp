@@ -1,107 +1,86 @@
 #include "stream.h"
 #include "error.h"
+#include "type.h"
 #include "value.h"
 #include <format>
+#include <stdexcept>
+
+// NOTE I am not handling user errors in here, so any caller needs to handle
+// possible file errors to return useful errors to the user. If a C++ error is
+// encountered it is a library error and not a liscpp runtime error.
 
 Stream::Stream(const std::string &filename, StreamType type)
     : m_type{type}, m_stream{&std::cout} {
-  if (type == StreamType::Ifile) {
+  if (type == StreamType::InFile) {
     auto ifs = new std::ifstream();
-    try {
-      ifs->open(filename);
-      m_stream = StreamUnion(ifs);
-    } catch (std::exception e) {
-      throw FileError(filename, "opening", e.what());
-    }
-  } else if (type == StreamType::Ofile) {
+    ifs->open(filename);
+    m_stream = StreamUnion(ifs);
+  } else if (type == StreamType::OutFile) {
     auto ofs = new std::ofstream();
-    try {
-      ofs->open(filename);
-      m_stream = StreamUnion(ofs);
-    } catch (std::exception e) {
-      throw FileError(filename, "opening", e.what());
-    }
+    ofs->open(filename);
+    m_stream = StreamUnion(ofs);
   } else {
-    throw Panic(
-        std::format("file stream must be of type Ifile or Ofile: Got {}",
-                    this->type_string()));
+    std::invalid_argument(std::format(
+        "file stream must be created with InFile or OutFile: Got {}",
+        type::str(type)));
   }
 }
 
-std::string Stream::type_string() {
-  switch (m_type) {
-  case StreamType::In:
-    return "InputStream";
-  case StreamType::Out:
-    return "OutputStream";
-  case StreamType::Ifile:
-    return "InputFileStream";
-  case StreamType::Ofile:
-    return "OutputFileStream";
-  }
-  throw Panic(std::format("Stream::type_string encountered uncovered type {}",
-                          int(m_type)));
-}
+Stream::~Stream() { close(); }
 
 bool Stream::is_open() {
   switch (m_type) {
-  case StreamType::In:
-  case StreamType::Out:
+  case StreamType::Input:
+  case StreamType::Output:
     return true;
-  case StreamType::Ifile:
+  case StreamType::InFile:
     return m_stream.ifs->is_open();
-  case StreamType::Ofile:
+  case StreamType::OutFile:
     return m_stream.ofs->is_open();
+  default:
+    throw std::invalid_argument(std::format(
+        "Stream::is_open encountered uncovered type: Got type (as int) {}",
+        int(m_type)));
   }
-  throw Panic(std::format("Stream::is_open encountered uncovered type {}",
-                          int(m_type)));
 }
 
 bool Stream::is_eof() {
   switch (m_type) {
-  case StreamType::In:
+  case StreamType::Input:
     return m_stream.is->eof();
-  case StreamType::Out:
+  case StreamType::Output:
     return m_stream.os->eof();
-  case StreamType::Ifile:
+  case StreamType::InFile:
     return m_stream.ifs->eof();
-  case StreamType::Ofile:
+  case StreamType::OutFile:
     return m_stream.ofs->eof();
+  default:
+    throw std::invalid_argument(std::format(
+        "Stream::is_eof encountered uncovered type: Got type (as int) {}",
+        int(m_type)));
   }
-  throw Panic(
-      std::format("Stream::eof encountered uncovered type {}", int(m_type)));
 }
 
 void Stream::close() {
-  if (m_type == StreamType::Ifile) {
+  if (m_type == StreamType::InFile) {
     m_stream.ifs->close();
-  } else if (m_type == StreamType::Ofile) {
+  } else if (m_type == StreamType::OutFile) {
     m_stream.ofs->close();
   }
 }
 
 std::string *Stream::get_line() {
-  // TODO This will make this slow, though not as bad as get_ch
-  // might be better to use try catch and throw errors if the read fails
-  if (!is_open()) {
-    throw IoError("cannot get line from closed stream", Value(this));
-  } else if (is_eof()) {
-    throw IoError("cannot get line from stream eof", Value(this));
-  }
-
   std::string *str = new std::string();
   switch (m_type) {
-  case StreamType::In:
+  case StreamType::Input:
     std::getline(*m_stream.is, *str);
     return str;
-  case StreamType::Ifile:
+  case StreamType::InFile:
     std::getline(*m_stream.ifs, *str);
     return str;
   default:
-    throw IoError(std::format("cannot get line from an output stream: Got {}",
-                              this->type_string()),
-                  Value(this));
+    throw std::invalid_argument(
+        std::format("invalid stream for Stream::get_line: Got {}",
+                    type::str(this->m_type)));
   }
 }
-
-Stream::~Stream() { close(); }

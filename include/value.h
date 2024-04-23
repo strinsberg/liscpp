@@ -65,15 +65,6 @@ public:
   Value(Error *e) : m_type{ValType::Err}, m_val{e} {}
   Value(Stream *s) : m_type{ValType::Strm}, m_val{s} {}
 
-  // raw fn pointer constructors
-  Value(Value (*f)());
-  Value(Value (*f)(Value));
-  Value(Value (*f)(Value, Value));
-  Value(Value (*f)(Value, Value, Value));
-  Value(Value (*f)(Value, Value, Value, Value));
-  Value(Value (*f)(Value, Value, Value, Value, Value));
-  Value(Value (*f)(const Value[], uint32_t));
-
   // Static type constructor methods
   static Value True();
   static Value False();
