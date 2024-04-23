@@ -33,7 +33,12 @@ Value Value::True() { return Value(true); }
 
 Value Value::False() { return Value(false); }
 
-Value Value::Char(uint32_t ch) { return Value(ch, ValType::Char); }
+Value Value::Char(char ch) {
+  Value v;
+  v.m_type = ValType::Char;
+  v.m_val.ch = ch;
+  return v;
+}
 
 Value Value::Int(int64_t i) { return Value(i); }
 
@@ -54,63 +59,6 @@ Value Value::Str(const std::string &s) {
   v.m_type = ValType::Str;
   v.m_val.s = new std::string(s);
   return v;
-}
-
-// Type Methods //////////////////////////////////////////////////////////////
-
-// TODO where are these used? in compiled code? There errors should be panics
-// that cannot be recovered from as if bad access occurs it is a compiler or
-// lib error. All hand coded uses of values will manually check types and
-// access to reduce double checking for types. Though it may be best to add
-// the panic and always use these for safety.
-
-bool Value::get_bool() const {
-  if (is_bool())
-    return m_val.b;
-  throw Panic(std::format("attempt to access Value as Bool: Actual type is {}",
-                          type_string()));
-}
-
-int64_t Value::get_int() const {
-  if (is_int())
-    return m_val.i;
-  throw Panic(std::format(
-      "attempt to access Value as Integer: Actual type is {}", type_string()));
-}
-
-double Value::get_flt() const {
-  if (is_flt())
-    return m_val.d;
-  throw Panic(std::format("attempt to access Value as Float: Actual type is {}",
-                          type_string()));
-}
-
-const std::string &Value::get_key() const {
-  if (is_key())
-    return *m_val.s;
-  throw Panic(std::format(
-      "attempt to access Value as Keyword: Actual type is {}", type_string()));
-}
-
-std::string *Value::get_str() const {
-  if (is_str())
-    return m_val.s;
-  throw Panic(std::format(
-      "attempt to access Value as String: Actual type is {}", type_string()));
-}
-
-Fn *Value::get_fn() const {
-  if (is_fn())
-    return m_val.f;
-  throw Panic(std::format(
-      "attempt to access Value as Function: Actual type is {}", type_string()));
-}
-
-Error *Value::get_error() const {
-  if (is_err())
-    return m_val.e;
-  throw Panic(std::format("attempt to access Value as Error: Actual type is {}",
-                          type_string()));
 }
 
 // Util ///////////////////////////////////////////////////////////////////////
@@ -189,7 +137,7 @@ void Value::to_external(std::ostream &os) const {
     os << (as_bool() ? "true" : "false");
     break;
   case ValType::Char:
-    os << "\\u" << std::hex << as_char();
+    os << as_char();
     break;
   case ValType::Int:
     os << as_int();

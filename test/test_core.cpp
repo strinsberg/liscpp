@@ -2,6 +2,7 @@
 #include "fn.h"
 #include "value.h"
 #include <gtest/gtest.h>
+#include <type_traits>
 
 // Compiler Only //////////////////////////////////////////////////////////////
 
@@ -59,6 +60,6 @@ TEST(CoreSum, does_it_sum_mixed_ints_and_floats) {
 }
 
 TEST(Core_plus_, does_it_point_to_core_sum) {
-  EXPECT_EQ(_plus_.get_type(), ValType::Fn);
-  EXPECT_EQ(*_plus_.get_fn(), Fn(__core__::sum));
+  ASSERT_EQ(_plus_.get_type(), ValType::Fn);
+  EXPECT_EQ(*_plus_.as_fn(), Fn(__core__::sum));
 }

@@ -52,7 +52,6 @@ private:
 
 // These are the functions present in the module
 namespace __mod_io__ {
-Value getch(Value);
 Value getline(Value);
 } // namespace __mod_io__
 

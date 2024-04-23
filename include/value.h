@@ -35,7 +35,6 @@ enum class ValType {
 union ValUnion {
   ValUnion() : i{0} {}
   ValUnion(bool b) : b{b} {}
-  ValUnion(uint32_t u) : u{u} {}
   ValUnion(int64_t i) : i{i} {}
   ValUnion(double d) : d{d} {}
   ValUnion(std::string *s) : s{s} {}
@@ -44,7 +43,7 @@ union ValUnion {
   ValUnion(Stream *s) : st{s} {}
 
   bool b;
-  uint32_t u;
+  char ch;
   int64_t i;
   double d;
   std::string *s;
@@ -59,7 +58,6 @@ public:
   // type constructors
   Value() : m_type{ValType::Nil}, m_val{} {}
   Value(bool b) : m_type{ValType::Bool}, m_val{b} {}
-  Value(uint32_t u, ValType type) : m_type{type}, m_val{u} {}
   Value(int64_t i) : m_type{ValType::Int}, m_val{i} {}
   Value(double d) : m_type{ValType::Flt}, m_val{d} {}
   Value(std::string *s) : m_type{ValType::Str}, m_val{s} {}
@@ -80,9 +78,9 @@ public:
   static Value True();
   static Value False();
   static Value Int(int64_t);
-  static Value Char(uint32_t);
-  static Value Key(const std::string&);
-  static Value Str(const std::string&);
+  static Value Char(char);
+  static Value Key(const std::string &);
+  static Value Str(const std::string &);
 
   // predicates
   inline bool is_nil() const { return m_type == ValType::Nil; }
@@ -98,27 +96,18 @@ public:
 
   // unsafe accessors
   inline bool as_bool() const { return m_val.b; }
-  inline uint32_t as_char() const { return m_val.u; }
+  inline char as_char() const { return m_val.ch; }
   inline int64_t as_int() const { return m_val.i; }
   inline double as_flt() const { return m_val.d; }
-  inline const std::string& as_key() const { return *m_val.s; }
+  inline const std::string &as_key() const { return *m_val.s; }
   // TODO if a value is immutable these should return const&
   inline std::string *as_str() const { return m_val.s; }
   inline Fn *as_fn() const { return m_val.f; }
   inline Error *as_error() const { return m_val.e; }
   inline Stream *as_strm() const { return m_val.st; }
 
-  // safe accessors
-  ValType get_type() const { return m_type; }
-  bool get_bool() const;
-  int64_t get_int() const;
-  double get_flt() const;
-  const std::string& get_key() const;
-  std::string *get_str() const;
-  Fn *get_fn() const;
-  Error *get_error() const;
-
   // util
+  inline ValType get_type() const { return m_type; }
   bool is_truthy() const;
   const std::string type_string() const;
 
@@ -127,14 +116,14 @@ public:
   bool operator!=(const Value &other) const { return !(*this == other); }
 
   // Representations
-  void to_external(std::ostream& os) const;
-  void to_display(std::ostream& os) const;
+  void to_external(std::ostream &os) const;
+  void to_display(std::ostream &os) const;
 
 private:
   ValType m_type;
   ValUnion m_val;
 };
 
-std::ostream& operator<<(std::ostream& os, const Value& value);
+std::ostream &operator<<(std::ostream &os, const Value &value);
 
 #endif
