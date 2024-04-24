@@ -1,6 +1,6 @@
 #include "mod_io.h"
-#include "stream.h"
 #include "fn.h"
+#include "stream.h"
 #include <error.h>
 
 ModIo *ModIo::m_mod = nullptr;
@@ -18,9 +18,7 @@ ModIo *ModIo::require() {
 // will not have free code, but since clojure and other languages allow
 // code to be written outside of functions that code would be executed on
 // the first require inside this function.
-void ModIo::init() {
-  getline = Value::new_fn(new Fn(__mod_io__::getline));
-}
+void ModIo::init() { getline = Value::new_fn(new Fn(__mod_io__::getline)); }
 
 // Function definitions ///////////////////////////////////////////////////////
 
@@ -32,6 +30,6 @@ Value __mod_io__::getline(Value stream) {
     }
     return Value::new_string(s->get_line());
   }
-  throw InvalidArgError("core.io/getline", "Stream", type::str(stream.get_type()), 0,
-                        stream);
+  throw InvalidArgError("core.io/getline", "Stream",
+                        type::str(stream.get_type()), 0, stream);
 }

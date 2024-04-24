@@ -1,8 +1,8 @@
 #include "value.h"
 #include "error.h"
 #include "fn.h"
-#include "type.h"
 #include "stream.h"
+#include "type.h"
 #include <cstdint>
 #include <format>
 #include <iomanip>
@@ -31,13 +31,9 @@ Value Value::new_char(char ch) {
   return v;
 }
 
-Value Value::new_int(int64_t i) {
-  return Value{i};
-}
+Value Value::new_int(int64_t i) { return Value{i}; }
 
-Value Value::new_float(double d) {
-  return Value{d};
-}
+Value Value::new_float(double d) { return Value{d}; }
 
 // symbols and keywords might change internals, gonna keep it simple and just
 // allow using string literals, but I think it will generally be better to

@@ -8,26 +8,19 @@
 
 TEST(CoreApplyFn, does_it_apply_a_function_properly) {
   Value args[5] = {
-    Value::new_int(1),
-    Value::new_int(2),
-    Value::new_int(3),
-    Value::new_int(4),
-    Value::new_int(5),
+      Value::new_int(1), Value::new_int(2), Value::new_int(3),
+      Value::new_int(4), Value::new_int(5),
   };
   Value x = __core__::apply_fn(_plus_, args, 5);
   EXPECT_EQ(x, Value::new_int(15));
 }
 
-
 // Arithmetic /////////////////////////////////////////////////////////////////
 
 TEST(CoreSum, does_it_sum_ints) {
   Value args[5] = {
-    Value::new_int(1),
-    Value::new_int(2),
-    Value::new_int(3),
-    Value::new_int(4),
-    Value::new_int(5),
+      Value::new_int(1), Value::new_int(2), Value::new_int(3),
+      Value::new_int(4), Value::new_int(5),
   };
   Value x = __core__::sum(args, 5);
   EXPECT_EQ(x, Value::new_int(15));
@@ -35,11 +28,8 @@ TEST(CoreSum, does_it_sum_ints) {
 
 TEST(CoreSum, does_it_sum_floats) {
   Value args[5] = {
-    Value::new_float(1.5),
-    Value::new_float(2.3),
-    Value::new_float(3.4),
-    Value::new_float(4.5),
-    Value::new_float(5.9),
+      Value::new_float(1.5), Value::new_float(2.3), Value::new_float(3.4),
+      Value::new_float(4.5), Value::new_float(5.9),
   };
   Value x = __core__::sum(args, 5);
   EXPECT_TRUE(x.is_float());
@@ -48,11 +38,8 @@ TEST(CoreSum, does_it_sum_floats) {
 
 TEST(CoreSum, does_it_sum_mixed_ints_and_floats) {
   Value args[5] = {
-    Value::new_int(1),
-    Value::new_float(2.3),
-    Value::new_int(3),
-    Value::new_float(4.5),
-    Value::new_float(5.9),
+      Value::new_int(1),     Value::new_float(2.3), Value::new_int(3),
+      Value::new_float(4.5), Value::new_float(5.9),
   };
   Value x = __core__::sum(args, 5);
   EXPECT_TRUE(x.is_float());

@@ -6,7 +6,8 @@
 Error::Error(const std::string &message, Value data, Value type)
     : m_message{message}, m_type{type}, m_data{data} {
   if (not m_type.is_keyword())
-    throw InvalidArgError("error", "Keyword", type::str(m_type.get_type()), 2, m_type);
+    throw InvalidArgError("error", "Keyword", type::str(m_type.get_type()), 2,
+                          m_type);
 }
 
 const char *Error::what() const throw() {

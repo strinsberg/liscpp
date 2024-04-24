@@ -49,7 +49,8 @@ Value __core__::sum(const Value args[], uint32_t n) {
       }
       break;
     default:
-      throw InvalidArgError("+", "Number", type::str(args[i].get_type()), i, args[i]);
+      throw InvalidArgError("+", "Number", type::str(args[i].get_type()), i,
+                            args[i]);
     }
   }
 

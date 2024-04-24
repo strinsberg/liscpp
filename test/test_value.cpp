@@ -1,11 +1,9 @@
-#include "value.h"
 #include "fn.h"
+#include "value.h"
 #include <gtest/gtest.h>
 
 // Test function(s) to pass to Values where needed
-Value __test_fn__() {
-  return Value(); 
-}
+Value __test_fn__() { return Value(); }
 
 // Value Tests ////////////////////////////////////////////////////////////////
 

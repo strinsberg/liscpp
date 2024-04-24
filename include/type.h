@@ -49,7 +49,8 @@ namespace type {
 std::string str(ValueType);
 std::string str(FnType);
 std::string str(StreamType);
-std::invalid_argument throw_uncovered_type(const std::string& where, int type_as_int);
+std::invalid_argument throw_uncovered_type(const std::string &where,
+                                           int type_as_int);
 } // namespace type
 
 std::ostream &operator<<(std::ostream &, const ValueType &);
