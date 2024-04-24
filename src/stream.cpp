@@ -20,7 +20,7 @@ Stream::Stream(const std::string &filename, StreamType type)
     ofs->open(filename);
     m_stream = {.ofs = ofs};
   } else {
-    std::invalid_argument(std::format(
+    throw std::invalid_argument(std::format(
         "file stream must be created with InFile or OutFile: Got {}",
         type::str(type)));
   }
@@ -38,9 +38,7 @@ bool Stream::is_open() {
   case StreamType::OutFile:
     return m_stream.ofs->is_open();
   default:
-    throw std::invalid_argument(std::format(
-        "Stream::is_open encountered uncovered type: Got type (as int) {}",
-        int(m_type)));
+    throw type::throw_uncovered_type("Stream::is_open", int(m_type));
   }
 }
 
@@ -55,9 +53,7 @@ bool Stream::is_eof() {
   case StreamType::OutFile:
     return m_stream.ofs->eof();
   default:
-    throw std::invalid_argument(std::format(
-        "Stream::is_eof encountered uncovered type: Got type (as int) {}",
-        int(m_type)));
+    throw type::throw_uncovered_type("Stream::is_eof", int(m_type));
   }
 }
 
@@ -80,7 +76,8 @@ std::string *Stream::get_line() {
     return str;
   default:
     throw std::invalid_argument(
-        std::format("invalid stream for Stream::get_line: Got {}",
+        std::format("invalid stream for Stream::get_line: Expected "
+                    "StreamType::Input or Stream::InFile: Got {}",
                     type::str(this->m_type)));
   }
 }

@@ -1,5 +1,6 @@
 #include "fn.h"
 #include "error.h"
+#include "type.h"
 #include "value.h"
 #include <cstdint>
 #include <format>
@@ -27,9 +28,7 @@ Value Fn::operator()(const Value args[], uint32_t n) {
   case FnType::FnAny:
     return m_fn.fn_any(args, n);
   default:
-    throw std::invalid_argument(std::format(
-        "Fn::operator() encountered uncovered type: Got type (as int) {}",
-        int(m_type)));
+    throw type::throw_uncovered_type("Fn::operator()", int(m_type));
   }
 }
 
@@ -50,8 +49,6 @@ bool Fn::operator==(const Fn &other) const {
   case FnType::FnAny:
     return other.m_type == FnType::FnAny and m_fn.fn_any == other.m_fn.fn_any;
   default:
-    throw std::invalid_argument(std::format(
-        "Fn::operator== encountered uncovered type: Got type (as int) {}",
-        int(m_type)));
+    throw type::throw_uncovered_type("Fn::operator==", int(m_type));
   }
 }

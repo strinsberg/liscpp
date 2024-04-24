@@ -45,7 +45,7 @@ std::string type::str(ValueType t) {
   case ValueType::Error:
     return "ValueType::Error";
   default:
-    throw std::invalid_argument(std::format("uncovered ValueType: {}", int(t)));
+    throw type::throw_uncovered_type("type::str(ValueType)", int(t));
   }
 }
 
@@ -66,7 +66,7 @@ std::string type::str(FnType t) {
   case FnType::FnAny:
     return "FnType::FnAny";
   default:
-    throw std::invalid_argument(std::format("uncovered ValueType: {}", int(t)));
+    throw type::throw_uncovered_type("type::str(FnType)", int(t));
   }
 }
 
@@ -81,7 +81,7 @@ std::string type::str(StreamType t) {
   case StreamType::OutFile:
     return "StreamType::OutFile";
   default:
-    throw std::invalid_argument(std::format("uncovered ValueType: {}", int(t)));
+    throw type::throw_uncovered_type("type::str(StreamType)", int(t));
   }
 }
 
