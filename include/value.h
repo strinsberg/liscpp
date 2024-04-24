@@ -6,11 +6,17 @@
 #include <exception>
 #include <stdexcept>
 #include <string>
+#include <vector>
+#include <gc/gc_allocator.h>
 
 class Fn;
 class Error;
 class Closure;
 class Stream;
+
+class Value;
+typedef std::vector<Value, gc_allocator<Value>> GcVector;
+typedef std::basic_string<char, std::char_traits<char>, gc_allocator<char>> GcString;
 
 class Value {
 public:
@@ -28,9 +34,9 @@ public:
   static Value new_char(char);
   static Value new_symbol(const std::string &);
   static Value new_keyword(const std::string &);
-  static Value new_string(std::string *);
+  static Value new_string(GcString *);
   // static Value List(List*);
-  // static Value Vector(std::vector<Value>*);
+  static Value new_vector(GcVector *);
   // static Value Map(std::map<Value, Value>*); // might not work without
   // wrapper static Value Iterator(); // not sure yet
   static Value new_fn(Fn *);
@@ -65,11 +71,11 @@ public:
   inline char as_char() const { return m_val.ch; }
   inline int64_t as_int() const { return m_val.i; }
   inline double as_flt() const { return m_val.d; }
-  inline const std::string &as_key() const { return *m_val.str; }
-  inline const std::string &as_symbol() const { return *m_val.str; }
-  inline std::string *as_str() const { return m_val.str; }
+  inline const GcString &as_key() const { return *m_val.str; }
+  inline const GcString &as_symbol() const { return *m_val.str; }
+  inline GcString *as_str() const { return m_val.str; }
   // inline List *as_list() const { return m_val.list; }
-  // inline std::vector<Value> *as_vector() const { return m_val.vec; }
+  inline GcVector *as_vector() const { return m_val.vec; }
   // inline std::map<Value, Value> *as_map() const { return m_val.map; }
   // inline Iterator *as_iterator() const { return m_val.iter; }
   inline Fn *as_fn() const { return m_val.fn; }
@@ -98,9 +104,9 @@ private:
     char ch;
     int64_t i;
     double d;
-    std::string *str;
+    GcString *str;
     // List* list;
-    // std::vector<Value>* vec;
+    GcVector* vec;
     // std::map<Value, Value>* map;
     // Iterator* iter;
     Fn *fn;

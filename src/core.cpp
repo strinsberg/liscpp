@@ -4,6 +4,7 @@
 #include "value.h"
 #include <cstdint>
 #include <stdexcept>
+#include <gc/gc_allocator.h>
 
 // Compiler Use ///////////////////////////////////////////////////////////////
 
@@ -70,4 +71,12 @@ Value __core__::equal(const Value args[], uint32_t n) {
       return Value::new_false();
   }
   return Value::new_true();
+}
+
+// Vectors ////////////////////////////////////////////////////////////////////
+
+Value __core__::vector(const Value[], uint32_t n) {
+  GcVector* vec = new GcVector(n);
+  
+  return Value::new_vector(vec);
 }

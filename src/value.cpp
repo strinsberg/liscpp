@@ -41,18 +41,18 @@ Value Value::new_float(double d) { return Value{d}; }
 Value Value::new_symbol(const std::string &s) {
   Value v;
   v.m_type = ValueType::Symbol;
-  v.m_val.str = new std::string(s);
+  v.m_val.str = new GcString(s);
   return v;
 }
 
 Value Value::new_keyword(const std::string &s) {
   Value v;
   v.m_type = ValueType::Keyword;
-  v.m_val.str = new std::string(s);
+  v.m_val.str = new GcString(s);
   return v;
 }
 
-Value Value::new_string(std::string *s) {
+Value Value::new_string(GcString *s) {
   Value v;
   v.m_type = ValueType::String;
   v.m_val.str = s;
@@ -60,7 +60,13 @@ Value Value::new_string(std::string *s) {
 }
 
 // Value Value::List(List*);
-// Value Value::Vector(std::vector<Value>*);
+Value Value::new_vector(GcVector *vec) {
+  Value v;
+  v.m_type = ValueType::Vector;
+  v.m_val.vec = vec;
+  return v;
+}
+
 // Value Value::Map(std::map<Value, Value>*);
 // Value Value::Iterator();
 
@@ -111,6 +117,8 @@ bool Value::operator==(const Value &other) const {
     return other.is_keyword() and as_key() == other.as_key();
   case ValueType::String:
     return other.is_string() and *as_str() == *other.as_str();
+  case ValueType::Vector:
+    return other.is_vector() and *as_vector() == *other.as_vector();
   case ValueType::Fn:
     return other.is_fn() and *as_fn() == *other.as_fn();
   case ValueType::Stream:
@@ -144,8 +152,20 @@ void Value::to_external(std::ostream &os) const {
     os << as_key();
     break;
   case ValueType::String:
-    os << *as_str();
+    os << '"' << *as_str() << '"';
     break;
+  case ValueType::Vector: {
+    GcVector *v = as_vector();
+    os << "[";
+    if (v->size() > 0) {
+      for (auto it = v->begin(); it != v->end() - 1; ++it) {
+        os << *it << ", ";
+      }
+      os << v->back();
+    }
+    os << "]";
+    break;
+  }
   case ValueType::Fn: {
     // TODO should we add mod names to Fn as well ???
     Fn *f = as_fn();

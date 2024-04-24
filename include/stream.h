@@ -22,7 +22,7 @@ public:
   bool is_open();
   bool is_eof();
   void close();
-  std::string *get_line();
+  GcString *get_line();
 
 private:
   StreamType m_type;

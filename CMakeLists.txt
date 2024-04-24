@@ -30,6 +30,9 @@ file(GLOB_RECURSE LISCPP_TESTS test/*.cpp)
 add_library(${PROJECT_NAME} STATIC ${LISCPP_SOURCES} ${LISCPP_INCLUDES})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+# Add includes for the gclib
+include_directories(${CMAKE_BINARY_DIR}/bdwgc/include)
+
 # Add testing
 enable_testing()
 add_executable(test_${PROJECT_NAME} ${LISCPP_TESTS})

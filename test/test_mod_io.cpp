@@ -9,10 +9,10 @@ TEST(ModIoGetline, does_it_read_a_line_from_a_stream) {
   Value stream = Value::new_stream(new Stream{iss});
 
   EXPECT_EQ(__mod_io__::getline(stream),
-            Value::new_string(new std::string("hello, world!")));
+            Value::new_string(new GcString("hello, world!")));
   EXPECT_EQ(__mod_io__::getline(stream),
-            Value::new_string(new std::string("what is your name?")));
-  EXPECT_EQ(__mod_io__::getline(stream), Value::new_string(new std::string()));
+            Value::new_string(new GcString("what is your name?")));
+  EXPECT_EQ(__mod_io__::getline(stream), Value::new_string(new GcString()));
   EXPECT_EQ(__mod_io__::getline(stream), Value());
 }
 
@@ -24,7 +24,7 @@ TEST(ModIoGetline, can_it_be_applied_to_read_a_line_from_a_stream) {
   ModIo *mod = ModIo::require();
 
   EXPECT_EQ(__core__::apply_fn(mod->getline, args, 1),
-            Value::new_string(new std::string("hello, world!")));
+            Value::new_string(new GcString("hello, world!")));
   EXPECT_EQ(__core__::apply_fn(mod->getline, args, 1),
-            Value::new_string(new std::string("what is your name?")));
+            Value::new_string(new GcString("what is your name?")));
 }

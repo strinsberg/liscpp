@@ -65,8 +65,8 @@ void Stream::close() {
   }
 }
 
-std::string *Stream::get_line() {
-  std::string *str = new std::string();
+GcString *Stream::get_line() {
+  GcString *str = new GcString();
   switch (m_type) {
   case StreamType::Input:
     std::getline(*m_stream.is, *str);

@@ -25,14 +25,17 @@ Value apply_fn(Value, const Value args[], uint32_t n);
 // internal functions for function values
 Value sum(const Value args[], uint32_t n);
 Value equal(const Value args[], uint32_t n);
+Value vector(const Value[], uint32_t n);
 
 } // namespace __core__
 
 // Arithmetic /////////////////////////////////////////////////////////////////
 
 namespace core {
-const Value _plus_ = Value::new_fn(new Fn("+", 0, __core__::sum));
-const Value _equal_ = Value::new_fn(new Fn("=", 1, __core__::equal));
+const Value _plus_ = Value::new_fn(new Fn("core/+", 0, __core__::sum));
+const Value _equal_ = Value::new_fn(new Fn("core/=", 1, __core__::equal));
+const Value vector = Value::new_fn(new Fn("core/vector", 1, __core__::equal));
+
 }
 
 #endif
