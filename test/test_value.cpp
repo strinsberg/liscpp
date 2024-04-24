@@ -10,15 +10,15 @@ Value __test_fn__() {
 // Value Tests ////////////////////////////////////////////////////////////////
 
 TEST(ValueTypes, does_it_set_its_types) {
-  Value i = Value::Int(42);
-  Value d = Value{0.34};
-  Value k = Value::Key(":key");
-  Value s = Value::Str("just a string");
-  Value f = Value{new Fn(__test_fn__)};
+  Value i = Value::new_int(42);
+  Value d = Value::new_float(0.34);
+  Value k = Value::new_keyword(":key");
+  Value s = Value::new_string(new std::string("just a string"));
+  Value f = Value::new_fn(new Fn(__test_fn__));
 
-  EXPECT_EQ(i.get_type(), ValType::Int);
-  EXPECT_EQ(d.get_type(), ValType::Flt);
-  EXPECT_EQ(k.get_type(), ValType::Key);
-  EXPECT_EQ(s.get_type(), ValType::Str);
-  EXPECT_EQ(f.get_type(), ValType::Fn);
+  EXPECT_TRUE(i.is_int());
+  EXPECT_TRUE(d.is_float());
+  EXPECT_TRUE(k.is_keyword());
+  EXPECT_TRUE(s.is_string());
+  EXPECT_TRUE(f.is_fn());
 }

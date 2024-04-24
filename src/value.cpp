@@ -1,6 +1,8 @@
 #include "value.h"
 #include "error.h"
 #include "fn.h"
+#include "type.h"
+#include "stream.h"
 #include <cstdint>
 #include <format>
 #include <iomanip>
@@ -8,71 +10,90 @@
 
 // Static Method Constructors /////////////////////////////////////////////////
 
-Value Value::True() { return Value(true); }
-
-Value Value::False() { return Value(false); }
-
-Value Value::Char(char ch) {
+Value Value::new_true() {
   Value v;
-  v.m_type = ValType::Char;
+  v.m_type = ValueType::Bool;
+  v.m_val.b = true;
+  return v;
+}
+
+Value Value::new_false() {
+  Value v;
+  v.m_type = ValueType::Bool;
+  v.m_val.b = false;
+  return v;
+}
+
+Value Value::new_char(char ch) {
+  Value v;
+  v.m_type = ValueType::Char;
   v.m_val.ch = ch;
   return v;
 }
 
-Value Value::Int(int64_t i) { return Value(i); }
+Value Value::new_int(int64_t i) {
+  return Value{i};
+}
 
-Value Value::Key(const std::string &s) {
+Value Value::new_float(double d) {
+  return Value{d};
+}
+
+// symbols and keywords might change internals, gonna keep it simple and just
+// allow using string literals, but I think it will generally be better to
+// explicitly construct the string with new and pass it into values.
+Value Value::new_symbol(const std::string &s) {
   Value v;
-  v.m_type = ValType::Key;
-  v.m_val.s = new std::string(s);
+  v.m_type = ValueType::Symbol;
+  v.m_val.str = new std::string(s);
   return v;
 }
 
-// Sort of a helper for when it is more convinient to work with a string literal
-// unless I can convince myself that this way is as efficient as creating the
-// string pointer first. The major reason for abstracting like this is that
-// creating the pointer will have to use the gc_allocator to ensure the string
-// contents are collectable.
-Value Value::Str(const std::string &s) {
+Value Value::new_keyword(const std::string &s) {
   Value v;
-  v.m_type = ValType::Str;
-  v.m_val.s = new std::string(s);
+  v.m_type = ValueType::Keyword;
+  v.m_val.str = new std::string(s);
   return v;
 }
 
-// Util ///////////////////////////////////////////////////////////////////////
-
-bool Value::is_truthy() const {
-  return !(is_nil() or (is_bool() and !as_bool()));
+Value Value::new_string(std::string *s) {
+  Value v;
+  v.m_type = ValueType::String;
+  v.m_val.str = s;
+  return v;
 }
 
-const std::string Value::type_string() const {
-  switch (m_type) {
-  case ValType::Nil:
-    return "Nil";
-  case ValType::Bool:
-    return "Bool";
-  case ValType::Char:
-    return "Character";
-  case ValType::Int:
-    return "Integer";
-  case ValType::Flt:
-    return "Float";
-  case ValType::Key:
-    return "Keyword";
-  case ValType::Str:
-    return "String";
-  case ValType::Fn:
-    return "Function";
-  case ValType::Clos:
-    return "Closure";
-  case ValType::Strm:
-    return "Stream";
-  case ValType::Err:
-    return "Error";
-  }
-  throw Panic(std::format("value::type_string encountered uncovered type {}",
-                          int(m_type)));
+// Value Value::List(List*);
+// Value Value::Vector(std::vector<Value>*);
+// Value Value::Map(std::map<Value, Value>*);
+// Value Value::Iterator();
+
+Value Value::new_fn(Fn *f) {
+  Value v;
+  v.m_type = ValueType::Fn;
+  v.m_val.fn = f;
+  return v;
+}
+
+Value Value::new_closure(Closure *c) {
+  Value v;
+  v.m_type = ValueType::Closure;
+  v.m_val.closure = c;
+  return v;
+}
+
+Value Value::new_stream(Stream *s) {
+  Value v;
+  v.m_type = ValueType::Stream;
+  v.m_val.stream = s;
+  return v;
+}
+
+Value Value::new_error(Error *e) {
+  Value v;
+  v.m_type = ValueType::Error;
+  v.m_val.err = e;
+  return v;
 }
 
 // Overloads //////////////////////////////////////////////////////////////////
@@ -80,78 +101,78 @@ const std::string Value::type_string() const {
 // NOTE these need to be deep equality, not just pointer comparissons
 bool Value::operator==(const Value &other) const {
   switch (m_type) {
-  case ValType::Nil:
+  case ValueType::Nil:
     return other.is_nil();
-  case ValType::Bool:
+  case ValueType::Bool:
     return other.is_bool() and as_bool() == other.as_bool();
-  case ValType::Char:
+  case ValueType::Char:
     return other.is_char() and as_char() == other.as_char();
-  case ValType::Int:
+  case ValueType::Int:
     return other.is_int() and as_int() == other.as_int();
-  case ValType::Flt:
-    return other.is_flt() and as_flt() == other.as_flt();
-  case ValType::Key:
-    return other.is_key() and as_key() == other.as_key();
-  case ValType::Str:
-    return other.is_str() and *as_str() == *other.as_str();
-  case ValType::Fn:
+  case ValueType::Float:
+    return other.is_float() and as_flt() == other.as_flt();
+  case ValueType::Keyword:
+    return other.is_keyword() and as_key() == other.as_key();
+  case ValueType::String:
+    return other.is_string() and *as_str() == *other.as_str();
+  case ValueType::Fn:
     return other.is_fn() and *as_fn() == *other.as_fn();
-  case ValType::Strm:
-    return other.is_strm() and as_strm() == other.as_strm();
-  case ValType::Err:
-    return other.is_err() and *as_error() == *other.as_error();
+  case ValueType::Stream:
+    return other.is_stream() and as_stream() == other.as_stream();
+  case ValueType::Error:
+    return other.is_error() and *as_error() == *other.as_error();
   }
-  throw Panic(std::format("value::operator== encountered uncovered type {}",
-                          int(m_type)));
+  throw type::throw_uncovered_type("Value::operator==", int(m_type));
 }
 
 // Representations ////////////////////////////////////////////////////////////
 
 void Value::to_external(std::ostream &os) const {
   switch (m_type) {
-  case ValType::Nil:
+  case ValueType::Nil:
     os << "nil";
     break;
-  case ValType::Bool:
+  case ValueType::Bool:
     os << (as_bool() ? "true" : "false");
     break;
-  case ValType::Char:
+  case ValueType::Char:
     os << as_char();
     break;
-  case ValType::Int:
+  case ValueType::Int:
     os << as_int();
     break;
-  case ValType::Flt:
+  case ValueType::Float:
     os << as_flt();
     break;
-  case ValType::Key:
+  case ValueType::Keyword:
     os << as_key();
     break;
-  case ValType::Str:
+  case ValueType::String:
     os << *as_str();
     break;
-  case ValType::Fn:
-    // TODO when Fn is given more fields include them here or add display and
-    // external to Fn to print them properly and call those here.
-    os << "#<Fn>";
+  case ValueType::Fn: {
+    // TODO should we add mod names to Fn as well ???
+    Fn *f = as_fn();
+    os << "#<Fn: " << f->get_name() << "(" << f->get_arity() << ")"
+       << ">";
     break;
-  case ValType::Clos:
+  }
+  case ValueType::Closure:
     // TODO fix if closure has more data that can be used
     os << "#<Closure>";
     break;
-  case ValType::Strm:
-    // TODO set this up in stream and call that method. It can give info on
-    // the stream type and bytes left etc.
-    os << "#<Stream>";
+  case ValueType::Stream: {
+    Stream *s = as_stream();
+    os << "#<Stream: " << s->get_type() << ">";
     break;
-  case ValType::Err:
+  }
+  case ValueType::Error:
     // TODO overlaod error types with these output methods and give a nice
     // representation of the error object.
     os << "#<Error>";
     break;
   default:
-    throw Panic(std::format("value::to_external encountered uncovered type {}",
-                            int(m_type)));
+    throw type::throw_uncovered_type("Value::to_external", int(m_type));
   }
 }
 

@@ -19,19 +19,19 @@ ModIo *ModIo::require() {
 // code to be written outside of functions that code would be executed on
 // the first require inside this function.
 void ModIo::init() {
-  getline = Value{new Fn{__mod_io__::getline}};
+  getline = Value::new_fn(new Fn(__mod_io__::getline));
 }
 
 // Function definitions ///////////////////////////////////////////////////////
 
 Value __mod_io__::getline(Value stream) {
-  if (stream.is_strm()) {
-    Stream *s = stream.as_strm();
+  if (stream.is_stream()) {
+    Stream *s = stream.as_stream();
     if (!s->is_open() or s->is_eof()) {
       return Value();
     }
-    return Value(s->get_line());
+    return Value::new_string(s->get_line());
   }
-  throw InvalidArgError("core.io/getline", "Stream", stream.type_string(), 0,
+  throw InvalidArgError("core.io/getline", "Stream", type::str(stream.get_type()), 0,
                         stream);
 }

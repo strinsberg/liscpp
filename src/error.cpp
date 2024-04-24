@@ -5,8 +5,8 @@
 
 Error::Error(const std::string &message, Value data, Value type)
     : m_message{message}, m_type{type}, m_data{data} {
-  if (not m_type.is_key())
-    throw InvalidArgError("error", "Keyword", m_type.type_string(), 2, m_type);
+  if (not m_type.is_keyword())
+    throw InvalidArgError("error", "Keyword", type::str(m_type.get_type()), 2, m_type);
 }
 
 const char *Error::what() const throw() {
@@ -22,7 +22,7 @@ ArityError::ArityError(const std::string &fn_name, uint32_t expected,
                        uint32_t given)
     : Error(std::format("Arity Error: {} expects at least {} args: Got {}",
                         fn_name, expected, given),
-            Value::Key(":arity"), Value()) {}
+            Value::new_keyword(":arity"), Value()) {}
 
 InvalidArgError::InvalidArgError(const std::string &fn_name,
                                  const std::string &expected,
@@ -31,13 +31,14 @@ InvalidArgError::InvalidArgError(const std::string &fn_name,
     : Error(std::format(
                 "Invalid Argument Error: {} expects {} at position {}: Got {}",
                 fn_name, pos, expected, given),
-            Value::Key(":invalid-argument"), data) {}
+            Value::new_keyword(":invalid-argument"), data) {}
 
 FileError::FileError(const std::string &filename, const std::string &operation,
                      const std::string &what)
     : Error(std::format("File Error: error {} file \"{}\": {}", filename,
                         operation, what),
-            Value::Key(":file"), Value()) {}
+            Value::new_keyword(":file"), Value()) {}
 
 IoError::IoError(const std::string &message, Value stream)
-    : Error(std::format("Io Error: {}", message), Value::Key(":io"), stream) {}
+    : Error(std::format("Io Error: {}", message), Value::new_keyword(":io"),
+            stream) {}

@@ -18,8 +18,8 @@ Value __core__::apply_fn(Value fn, const Value args[], uint32_t n) {
   } else {
     // TODO might be better with a custom error to indicate that the first arg
     // of a function application was not a function specifically.
-    throw InvalidArgError("function application", "Function", fn.type_string(),
-                          0, fn);
+    throw InvalidArgError("function application", "Function",
+                          type::str(fn.get_type()), 0, fn);
   }
 }
 
@@ -34,14 +34,14 @@ Value __core__::sum(const Value args[], uint32_t n) {
 
   for (uint32_t i = 0; i < n; ++i) {
     switch (args[i].get_type()) {
-    case ValType::Flt:
+    case ValueType::Float:
       if (!is_double) {
         is_double = true;
         y = double(x);
       }
       y = y + args[i].as_flt();
       break;
-    case ValType::Int:
+    case ValueType::Int:
       if (is_double) {
         y = y + args[i].as_int();
       } else {
@@ -49,11 +49,11 @@ Value __core__::sum(const Value args[], uint32_t n) {
       }
       break;
     default:
-      throw InvalidArgError("+", "Number", args[i].type_string(), i, args[i]);
+      throw InvalidArgError("+", "Number", type::str(args[i].get_type()), i, args[i]);
     }
   }
 
-  return is_double ? Value(y) : Value::Int(x);
+  return is_double ? Value::new_float(y) : Value::new_int(x);
 }
 
 // Comparisson ////////////////////////////////////////////////////////////////
@@ -62,11 +62,11 @@ Value __core__::sum(const Value args[], uint32_t n) {
 // Uses value operator== for deep equality
 Value __core__::equal(const Value args[], uint32_t n) {
   if (n == 1)
-    return Value::True();
+    return Value::new_true();
 
   for (uint32_t i = 0; i < n - 1; ++i) {
     if (!(args[i] == args[i + 1]))
-      return Value::False();
+      return Value::new_false();
   }
-  return Value::True();
+  return Value::new_true();
 }

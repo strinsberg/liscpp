@@ -10,15 +10,15 @@
 // encountered it is a library error and not a liscpp runtime error.
 
 Stream::Stream(const std::string &filename, StreamType type)
-    : m_type{type}, m_stream{&std::cout} {
+    : m_type{type}, m_stream{.is = &std::cin} {
   if (type == StreamType::InFile) {
     auto ifs = new std::ifstream();
     ifs->open(filename);
-    m_stream = StreamUnion(ifs);
+    m_stream = {.ifs = ifs};
   } else if (type == StreamType::OutFile) {
     auto ofs = new std::ofstream();
     ofs->open(filename);
-    m_stream = StreamUnion(ofs);
+    m_stream = {.ofs = ofs};
   } else {
     std::invalid_argument(std::format(
         "file stream must be created with InFile or OutFile: Got {}",

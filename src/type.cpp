@@ -4,6 +4,11 @@
 #include <stdexcept>
 #include <string>
 
+std::invalid_argument type::throw_uncovered_type(const std::string &where, int type_as_int) {
+  return std::invalid_argument(std::format(
+      "in {} found uncovered enum type: Type as int = {}", where, type_as_int));
+}
+
 std::string type::str(ValueType t) {
   switch (t) {
   case ValueType::Nil:

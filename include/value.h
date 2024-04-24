@@ -1,106 +1,87 @@
 #ifndef LISCPP_VALUE_H
 #define LISCPP_VALUE_H
 
+#include "type.h"
 #include <cstdint>
 #include <exception>
 #include <stdexcept>
 #include <string>
-
-/* Value types for the dynamic lisp types.
- *
- * Several different types and their enums/unions are all declared in this
- * header because they are circular dependencies and it is easier to keep them
- * all in the same place.
- */
 
 class Fn;
 class Error;
 class Closure;
 class Stream;
 
-enum class ValType {
-  Nil,
-  Bool,
-  Char,
-  Int,
-  Flt,
-  Key,
-  Str,
-  Fn,
-  Clos,
-  Strm,
-  Err,
-};
-
-union ValUnion {
-  ValUnion() : i{0} {}
-  ValUnion(bool b) : b{b} {}
-  ValUnion(int64_t i) : i{i} {}
-  ValUnion(double d) : d{d} {}
-  ValUnion(std::string *s) : s{s} {}
-  ValUnion(Fn *f) : f{f} {}
-  ValUnion(Error *e) : e{e} {}
-  ValUnion(Stream *s) : st{s} {}
-
-  bool b;
-  char ch;
-  int64_t i;
-  double d;
-  std::string *s;
-  Fn *f;
-  Closure *c;
-  Stream *st;
-  Error *e;
-};
-
 class Value {
 public:
   // type constructors
-  Value() : m_type{ValType::Nil}, m_val{} {}
-  Value(bool b) : m_type{ValType::Bool}, m_val{b} {}
-  Value(int64_t i) : m_type{ValType::Int}, m_val{i} {}
-  Value(double d) : m_type{ValType::Flt}, m_val{d} {}
-  Value(std::string *s) : m_type{ValType::Str}, m_val{s} {}
-  Value(Fn *f) : m_type{ValType::Fn}, m_val{f} {}
-  Value(Error *e) : m_type{ValType::Err}, m_val{e} {}
-  Value(Stream *s) : m_type{ValType::Strm}, m_val{s} {}
+  Value() : m_type{ValueType::Nil}, m_val{.i = 0} {}
 
-  // Static type constructor methods
-  static Value True();
-  static Value False();
-  static Value Int(int64_t);
-  static Value Char(char);
-  static Value Key(const std::string &);
-  static Value Str(const std::string &);
+  // Static type constructors.
+  // Trying to overload for all the types results in ambiguous overloads, so I
+  // either do this, functions, or a factory class.
+  static Value new_nil() { return Value(); }
+  static Value new_true();
+  static Value new_false();
+  static Value new_int(int64_t i);
+  static Value new_float(double d);
+  static Value new_char(char);
+  static Value new_symbol(const std::string &);
+  static Value new_keyword(const std::string &);
+  static Value new_string(std::string *);
+  // static Value List(List*);
+  // static Value Vector(std::vector<Value>*);
+  // static Value Map(std::map<Value, Value>*); // might not work without
+  // wrapper static Value Iterator(); // not sure yet
+  static Value new_fn(Fn *);
+  static Value new_closure(Closure *);
+  static Value new_stream(Stream *);
+  static Value new_error(Error *);
 
   // predicates
-  inline bool is_nil() const { return m_type == ValType::Nil; }
-  inline bool is_bool() const { return m_type == ValType::Bool; }
-  inline bool is_char() const { return m_type == ValType::Char; }
-  inline bool is_int() const { return m_type == ValType::Int; }
-  inline bool is_flt() const { return m_type == ValType::Flt; }
-  inline bool is_key() const { return m_type == ValType::Key; }
-  inline bool is_str() const { return m_type == ValType::Str; }
-  inline bool is_fn() const { return m_type == ValType::Fn; }
-  inline bool is_strm() const { return m_type == ValType::Strm; }
-  inline bool is_err() const { return m_type == ValType::Err; }
+  inline bool is_nil() const { return m_type == ValueType::Nil; }
+  inline bool is_bool() const { return m_type == ValueType::Bool; }
+  inline bool is_char() const { return m_type == ValueType::Char; }
+  inline bool is_int() const { return m_type == ValueType::Int; }
+  inline bool is_float() const { return m_type == ValueType::Float; }
+  inline bool is_symbol() const { return m_type == ValueType::Symbol; }
+  inline bool is_keyword() const { return m_type == ValueType::Keyword; }
+  inline bool is_string() const { return m_type == ValueType::String; }
+  inline bool is_list() const { return m_type == ValueType::List; }
+  inline bool is_vector() const { return m_type == ValueType::Vector; }
+  inline bool is_map() const { return m_type == ValueType::Map; }
+  inline bool is_iterator() const { return m_type == ValueType::Iterator; }
+  inline bool is_fn() const { return m_type == ValueType::Fn; }
+  inline bool is_closure() const { return m_type == ValueType::Closure; }
+  inline bool is_stream() const { return m_type == ValueType::Stream; }
+  inline bool is_error() const { return m_type == ValueType::Error; }
 
-  // unsafe accessors
+  // Accessors
+  // These are all unsafe, meaning that in lib and compiled code they should
+  // have type checks done before calling. The reason I am not putting the
+  // type checks in the accessors is that much of the time I will want to type
+  // check before calling them anyway and I don't want to type check twice.
   inline bool as_bool() const { return m_val.b; }
   inline char as_char() const { return m_val.ch; }
   inline int64_t as_int() const { return m_val.i; }
   inline double as_flt() const { return m_val.d; }
-  inline const std::string &as_key() const { return *m_val.s; }
-  // TODO if a value is immutable these should return const&
-  inline std::string *as_str() const { return m_val.s; }
-  inline Fn *as_fn() const { return m_val.f; }
-  inline Error *as_error() const { return m_val.e; }
-  inline Stream *as_strm() const { return m_val.st; }
+  inline const std::string &as_key() const { return *m_val.str; }
+  inline const std::string &as_symbol() const { return *m_val.str; }
+  inline std::string *as_str() const { return m_val.str; }
+  // inline List *as_list() const { return m_val.list; }
+  // inline std::vector<Value> *as_vector() const { return m_val.vec; }
+  // inline std::map<Value, Value> *as_map() const { return m_val.map; }
+  // inline Iterator *as_iterator() const { return m_val.iter; }
+  inline Fn *as_fn() const { return m_val.fn; }
+  inline Closure *as_closure() const { return m_val.closure; }
+  inline Stream *as_stream() const { return m_val.stream; }
+  inline Error *as_error() const { return m_val.err; }
 
   // util
-  inline ValType get_type() const { return m_type; }
-  bool is_truthy() const;
-  const std::string type_string() const;
+  inline ValueType get_type() const { return m_type; }
+  inline bool is_truthy() const {
+    return !(is_nil() or (is_bool() and !as_bool()));
+  }
 
   // Overloads
   bool operator==(const Value &other) const;
@@ -111,8 +92,30 @@ public:
   void to_display(std::ostream &os) const;
 
 private:
-  ValType m_type;
-  ValUnion m_val;
+  ValueType m_type;
+  union {
+    bool b;
+    char ch;
+    int64_t i;
+    double d;
+    std::string *str;
+    // List* list;
+    // std::vector<Value>* vec;
+    // std::map<Value, Value>* map;
+    // Iterator* iter;
+    Fn *fn;
+    Closure *closure;
+    Stream *stream;
+    Error *err;
+  } m_val;
+
+  // Some private constructors can make it better to initialize through the
+  // static constructor functions, but in an environment that is not ambiguous.
+  // But if we make them all public it can get tricky with pointers sometimes
+  // being seen as int types etc. or an int literal being ambiguos with the
+  // double type.
+  Value(int64_t i) : m_type{ValueType::Int}, m_val{.i = i} {}
+  Value(double d) : m_type{ValueType::Float}, m_val{.d = d} {}
 };
 
 std::ostream &operator<<(std::ostream &os, const Value &value);
