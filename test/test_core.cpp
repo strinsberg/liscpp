@@ -11,7 +11,7 @@ TEST(CoreApplyFn, does_it_apply_a_function_properly) {
       Value::new_int(1), Value::new_int(2), Value::new_int(3),
       Value::new_int(4), Value::new_int(5),
   };
-  Value x = __core__::apply_fn(_plus_, args, 5);
+  Value x = __core__::apply_fn(core::_plus_, args, 5);
   EXPECT_EQ(x, Value::new_int(15));
 }
 
@@ -47,6 +47,6 @@ TEST(CoreSum, does_it_sum_mixed_ints_and_floats) {
 }
 
 TEST(Core_plus_, does_it_point_to_core_sum) {
-  ASSERT_TRUE(_plus_.is_fn());
-  EXPECT_EQ(*_plus_.as_fn(), Fn("+", 0, __core__::sum));
+  ASSERT_TRUE(core::_plus_.is_fn());
+  EXPECT_EQ(*core::_plus_.as_fn(), Fn("+", 0, __core__::sum));
 }

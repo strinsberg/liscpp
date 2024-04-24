@@ -30,7 +30,9 @@ Value equal(const Value args[], uint32_t n);
 
 // Arithmetic /////////////////////////////////////////////////////////////////
 
+namespace core {
 const Value _plus_ = Value::new_fn(new Fn("+", 0, __core__::sum));
 const Value _equal_ = Value::new_fn(new Fn("=", 1, __core__::equal));
+}
 
 #endif
