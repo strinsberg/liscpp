@@ -32,9 +32,9 @@ Value vector(const Value[], uint32_t n);
 // Arithmetic /////////////////////////////////////////////////////////////////
 
 namespace core {
-const Value _plus_ = Value::new_fn(new Fn("core/+", 0, __core__::sum));
-const Value _equal_ = Value::new_fn(new Fn("core/=", 1, __core__::equal));
-const Value vector = Value::new_fn(new Fn("core/vector", 1, __core__::equal));
+const Value _plus_ = Value::new_fn(new Fn(new GcString("core/+"), 0, __core__::sum));
+const Value _equal_ = Value::new_fn(new Fn(new GcString("core/="), 1, __core__::equal));
+const Value vector = Value::new_fn(new Fn(new GcString("core/vector"), 1, __core__::equal));
 
 }
 

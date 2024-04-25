@@ -48,5 +48,5 @@ TEST(CoreSum, does_it_sum_mixed_ints_and_floats) {
 
 TEST(Core_plus_, does_it_point_to_core_sum) {
   ASSERT_TRUE(core::_plus_.is_fn());
-  EXPECT_EQ(*core::_plus_.as_fn(), Fn("+", 0, __core__::sum));
+  EXPECT_EQ(*core::_plus_.as_fn(), Fn(new GcString("core/+"), 0, __core__::sum));
 }

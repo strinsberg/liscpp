@@ -30,6 +30,6 @@ Value __mod_io__::getline(Value stream) {
     }
     return Value::new_string(s->get_line());
   }
-  throw InvalidArgError("core.io/getline", "Stream",
-                        type::str(stream.get_type()), 0, stream);
+  throw InvalidArgError(GcString("core.io/getline"), GcString("Stream"),
+                        GcString(type::str(stream.get_type())), 0, stream);
 }

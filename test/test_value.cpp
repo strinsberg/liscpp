@@ -86,8 +86,8 @@ TEST(ValueIsTruthy, do_all_values_match_expected_truth) {
   EXPECT_TRUE(Value::new_int(29).is_truthy());
   EXPECT_TRUE(Value::new_float(0.0).is_truthy());
   EXPECT_TRUE(Value::new_float(123.456).is_truthy());
-  EXPECT_TRUE(Value::new_symbol("cons").is_truthy());
-  EXPECT_TRUE(Value::new_keyword(":arg").is_truthy());
+  EXPECT_TRUE(Value::new_symbol(new GcString("cons")).is_truthy());
+  EXPECT_TRUE(Value::new_keyword(new GcString(":arg")).is_truthy());
   EXPECT_TRUE(Value::new_string(new GcString("")).is_truthy());
   EXPECT_TRUE(Value::new_string(new GcString("hello")).is_truthy());
   EXPECT_TRUE(Value::new_vector(new GcVector()).is_truthy());

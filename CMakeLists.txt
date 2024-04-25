@@ -33,7 +33,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 # Add includes for the gclib
 include_directories(${CMAKE_BINARY_DIR}/bdwgc/include)
 
-# Add testing
+# Add gtest testing
 enable_testing()
 add_executable(test_${PROJECT_NAME} ${LISCPP_TESTS})
 target_link_libraries(test_${PROJECT_NAME} ${PROJECT_NAME})
@@ -44,3 +44,7 @@ set_target_properties(test_${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY $
 
 add_test(NAME ${PROJECT_NAME} COMMAND test_${PROJECT_NAME})
 include(GoogleTest)
+
+# I want to add a test program that does not use Gtest, but just runs some
+# liscpp code. I will need it to build a sort of example compiled program and
+# ensure that I am working with memory and the garbage collector properly.

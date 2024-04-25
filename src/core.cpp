@@ -3,8 +3,8 @@
 #include "fn.h"
 #include "value.h"
 #include <cstdint>
-#include <stdexcept>
 #include <gc/gc_allocator.h>
+#include <stdexcept>
 
 // Compiler Use ///////////////////////////////////////////////////////////////
 
@@ -19,8 +19,9 @@ Value __core__::apply_fn(Value fn, const Value args[], uint32_t n) {
   } else {
     // TODO might be better with a custom error to indicate that the first arg
     // of a function application was not a function specifically.
-    throw InvalidArgError("function application", "Function",
-                          type::str(fn.get_type()), 0, fn);
+    throw InvalidArgError(GcString("function application"),
+                          GcString("Function"), GcString(type::str(fn.get_type())), 0,
+                          fn);
   }
 }
 
@@ -50,7 +51,8 @@ Value __core__::sum(const Value args[], uint32_t n) {
       }
       break;
     default:
-      throw InvalidArgError("+", "Number", type::str(args[i].get_type()), i,
+      throw InvalidArgError(GcString("core/+"), GcString("Number"),
+                            GcString(type::str(args[i].get_type())), i,
                             args[i]);
     }
   }
@@ -76,7 +78,7 @@ Value __core__::equal(const Value args[], uint32_t n) {
 // Vectors ////////////////////////////////////////////////////////////////////
 
 Value __core__::vector(const Value[], uint32_t n) {
-  GcVector* vec = new GcVector(n);
-  
+  GcVector *vec = new GcVector(n);
+
   return Value::new_vector(vec);
 }

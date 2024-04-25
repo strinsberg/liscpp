@@ -38,17 +38,17 @@ Value Value::new_float(double d) { return Value{d}; }
 // symbols and keywords might change internals, gonna keep it simple and just
 // allow using string literals, but I think it will generally be better to
 // explicitly construct the string with new and pass it into values.
-Value Value::new_symbol(const std::string &s) {
+Value Value::new_symbol(GcString*s) {
   Value v;
   v.m_type = ValueType::Symbol;
-  v.m_val.str = new GcString(s);
+  v.m_val.str = s;
   return v;
 }
 
-Value Value::new_keyword(const std::string &s) {
+Value Value::new_keyword(GcString*s) {
   Value v;
   v.m_type = ValueType::Keyword;
-  v.m_val.str = new GcString(s);
+  v.m_val.str = s;
   return v;
 }
 

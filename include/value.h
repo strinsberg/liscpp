@@ -4,10 +4,10 @@
 #include "type.h"
 #include <cstdint>
 #include <exception>
+#include <gc/gc_allocator.h>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <gc/gc_allocator.h>
 
 class Fn;
 class Error;
@@ -16,7 +16,8 @@ class Stream;
 
 class Value;
 typedef std::vector<Value, gc_allocator<Value>> GcVector;
-typedef std::basic_string<char, std::char_traits<char>, gc_allocator<char>> GcString;
+typedef std::basic_string<char, std::char_traits<char>, gc_allocator<char>>
+    GcString;
 
 class Value {
 public:
@@ -32,8 +33,8 @@ public:
   static Value new_int(int64_t i);
   static Value new_float(double d);
   static Value new_char(char);
-  static Value new_symbol(const std::string &);
-  static Value new_keyword(const std::string &);
+  static Value new_symbol(GcString *);
+  static Value new_keyword(GcString *);
   static Value new_string(GcString *);
   // static Value List(List*);
   static Value new_vector(GcVector *);
@@ -106,7 +107,7 @@ private:
     double d;
     GcString *str;
     // List* list;
-    GcVector* vec;
+    GcVector *vec;
     // std::map<Value, Value>* map;
     // Iterator* iter;
     Fn *fn;
