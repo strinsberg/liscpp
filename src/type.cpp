@@ -114,7 +114,33 @@ GcString str(ErrorType t) {
   return "**UNCOVERED-TYPE**";
 }
 
-// Typedefed Representations //////////////////////////////////////////////////
+// Representations ////////////////////////////////////////////////////////////
+const char ASCII_START = 33;
+const char ASCII_END = 126;
+
+void __type__::code_rep(std::ostream &os, const char &ch) {
+  switch (ch) {
+  case '\0':
+    os << "\\null";
+    break;
+  case '\t':
+    os << "\\tab";
+    break;
+  case '\n':
+    os << "\\newline";
+    break;
+  case ' ':
+    os << "\\space";
+    break;
+  default:
+    if (ch < ASCII_START or ch > ASCII_END) {
+      os << "\\x" << std::setw(2) << std::setfill('0') << std::hex
+         << (0xFF & ch);
+    } else {
+      os << "\\" << ch;
+    }
+  }
+}
 
 void __type__::code_rep(std::ostream &os, const GcString &s) {
   // TODO this will not fully escape the string, it will print quotes around it
@@ -148,8 +174,6 @@ void __type__::code_rep(std::ostream &os, const GcMap &m) {
   os << "}";
 }
 
-void __type__::display_rep(std::ostream &os, const GcString &s) { os << s; }
-
 void __type__::display_rep(std::ostream &os, const GcVector &v) {
   os << "[";
   if (v.size() > 0) {
@@ -179,7 +203,9 @@ void __type__::display_rep(std::ostream &os, const GcMap &m) {
 // Overload ostream ///////////////////////////////////////////////////////////
 
 std::ostream &operator<<(std::ostream &os, const liscpp::GcString &s) {
-  __type__::display_rep(os, s);
+  // NOTE since this is the operator that outputs GcString
+  // you cannot pass the parameter s or it will infinite loop.
+  os << s.c_str();
   return os;
 }
 

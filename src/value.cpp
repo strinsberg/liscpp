@@ -24,13 +24,13 @@ bool Value::operator==(const Value &other) const {
   case ValueType::Int:
     return other.is_int() and as_int() == other.as_int();
   case ValueType::Float:
-    return other.is_float() and as_flt() == other.as_flt();
+    return other.is_float() and as_float() == other.as_float();
   case ValueType::Keyword:
-    return other.is_float() and as_flt() == other.as_flt();
+    return other.is_keyword() and *as_keyword() == *other.as_keyword();
   case ValueType::Symbol:
-    return other.is_symbol() and as_symbol() == other.as_symbol();
+    return other.is_symbol() and *as_symbol() == *other.as_symbol();
   case ValueType::String:
-    return other.is_string() and *as_str() == *other.as_str();
+    return other.is_string() and *as_string() == *other.as_string();
   case ValueType::List:
     return other.is_list() and *as_list() == *other.as_list();
   case ValueType::Vector:
@@ -60,22 +60,22 @@ void Value::code_rep(std::ostream &os) const {
     os << (as_bool() ? "true" : "false");
     break;
   case ValueType::Char:
-    os << "#\\" << as_char();
+    __type__::code_rep(os, as_char());
     break;
   case ValueType::Int:
     os << as_int();
     break;
   case ValueType::Float:
-    os << as_flt();
+    os << as_float();
     break;
   case ValueType::Symbol:
-    os << as_symbol();
+    os << *as_symbol();
     break;
   case ValueType::Keyword:
-    os << as_key();
+    os << *as_keyword();
     break;
   case ValueType::String:
-    __type__::code_rep(os, *as_str());
+    __type__::code_rep(os, *as_string());
     break;
   case ValueType::List:
     as_list()->code_rep(os);
@@ -102,7 +102,6 @@ void Value::code_rep(std::ostream &os) const {
 }
 
 void Value::display_rep(std::ostream &os) const {
-  return code_rep(os);
   switch (m_type) {
   case ValueType::Nil:
   case ValueType::Bool:
@@ -117,7 +116,7 @@ void Value::display_rep(std::ostream &os) const {
     os << as_char();
     break;
   case ValueType::String:
-    __type__::display_rep(os, *as_str());
+    os << *as_string();
     break;
   case ValueType::List:
     as_list()->display_rep(os);

@@ -1,4 +1,5 @@
 #include "fn.h"
+#include "value_functions.h"
 #include "error.h"
 #include "type.h"
 #include "value.h"
@@ -66,6 +67,8 @@ Value Fn::operator()(const Value args[], uint32_t n) const {
   case FnType::Closure:
     return m_fn.fn_closure(m_captures, args, n);
   }
+  return Value(new Error(new GcString("**Uncovered FnType** in Fn::operator()"),
+                     ErrorType::Panic, Value(new Fn(*this))));
 }
 
 void Fn::code_rep(std::ostream &os) const {

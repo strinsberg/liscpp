@@ -20,6 +20,11 @@ public:
   Fn(GcString *name, GcVector *captures, uint32_t arity,
      Value (*f)(GcVector *, const Value[], uint32_t));
 
+  // Other constructors
+  Fn(const Fn &f)
+      : m_name{f.m_name}, m_arity{f.m_arity}, m_type{f.m_type},
+        m_captures{f.m_captures} {}
+
   // Accessors
   inline const GcString &get_name() const { return *m_name; }
   inline uint32_t get_arity() const { return m_arity; }

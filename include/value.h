@@ -20,6 +20,7 @@ public:
   // These can be ambiguous so call them through value function constructors
   Value() : m_type{ValueType::Nil}, m_val{.i = 0} {}
   Value(bool b) : m_type{ValueType::Bool}, m_val{.b = b} {}
+  Value(char ch) : m_type{ValueType::Char}, m_val{.ch = ch} {}
   Value(int64_t i) : m_type{ValueType::Int}, m_val{.i = i} {}
   Value(double d) : m_type{ValueType::Float}, m_val{.d = d} {}
   Value(ValueType t, GcString *s) : m_type{t}, m_val{.str = s} {}
@@ -56,10 +57,10 @@ public:
   inline bool as_bool() const { return m_val.b; }
   inline char as_char() const { return m_val.ch; }
   inline int64_t as_int() const { return m_val.i; }
-  inline double as_flt() const { return m_val.d; }
-  inline const GcString &as_key() const { return *m_val.str; }
-  inline const GcString &as_symbol() const { return *m_val.str; }
-  inline GcString *as_str() const { return m_val.str; }
+  inline double as_float() const { return m_val.d; }
+  inline GcString *as_keyword() const { return m_val.str; }
+  inline GcString *as_symbol() const { return m_val.str; }
+  inline GcString *as_string() const { return m_val.str; }
   inline List *as_list() const { return m_val.list; }
   inline GcVector *as_vector() const { return m_val.vec; }
   inline GcMap *as_map() const { return m_val.map; }

@@ -103,16 +103,14 @@ GcString str(StreamType);
 GcString str(FileOp);
 GcString str(ErrorType);
 
+void code_rep(std::ostream &, const char &);
 void code_rep(std::ostream &, const GcString &);
 void code_rep(std::ostream &, const GcVector &);
 void code_rep(std::ostream &, const GcMap &);
 
-void display_rep(std::ostream &, const GcString &);
 void display_rep(std::ostream &, const GcVector &);
 void display_rep(std::ostream &, const GcMap &);
 
-std::invalid_argument throw_uncovered_type(const std::string &where,
-                                           int type_as_int);
 } // namespace __type__
 
 } // namespace liscpp
