@@ -1,102 +1,14 @@
 #include "value.h"
 #include "error.h"
 #include "fn.h"
+#include "generator.h"
+#include "list.h"
 #include "stream.h"
 #include "type.h"
+#include "value_functions.h"
 #include <cstdint>
-#include <format>
-#include <iomanip>
-#include <stdexcept>
 
-// Static Method Constructors /////////////////////////////////////////////////
-
-Value Value::new_true() {
-  Value v;
-  v.m_type = ValueType::Bool;
-  v.m_val.b = true;
-  return v;
-}
-
-Value Value::new_false() {
-  Value v;
-  v.m_type = ValueType::Bool;
-  v.m_val.b = false;
-  return v;
-}
-
-Value Value::new_char(char ch) {
-  Value v;
-  v.m_type = ValueType::Char;
-  v.m_val.ch = ch;
-  return v;
-}
-
-Value Value::new_int(int64_t i) { return Value{i}; }
-
-Value Value::new_float(double d) { return Value{d}; }
-
-// symbols and keywords might change internals, gonna keep it simple and just
-// allow using string literals, but I think it will generally be better to
-// explicitly construct the string with new and pass it into values.
-Value Value::new_symbol(GcString*s) {
-  Value v;
-  v.m_type = ValueType::Symbol;
-  v.m_val.str = s;
-  return v;
-}
-
-Value Value::new_keyword(GcString*s) {
-  Value v;
-  v.m_type = ValueType::Keyword;
-  v.m_val.str = s;
-  return v;
-}
-
-Value Value::new_string(GcString *s) {
-  Value v;
-  v.m_type = ValueType::String;
-  v.m_val.str = s;
-  return v;
-}
-
-// Value Value::List(List*);
-Value Value::new_vector(GcVector *vec) {
-  Value v;
-  v.m_type = ValueType::Vector;
-  v.m_val.vec = vec;
-  return v;
-}
-
-// Value Value::Map(std::map<Value, Value>*);
-// Value Value::Iterator();
-
-Value Value::new_fn(Fn *f) {
-  Value v;
-  v.m_type = ValueType::Fn;
-  v.m_val.fn = f;
-  return v;
-}
-
-Value Value::new_closure(Closure *c) {
-  Value v;
-  v.m_type = ValueType::Closure;
-  v.m_val.closure = c;
-  return v;
-}
-
-Value Value::new_stream(Stream *s) {
-  Value v;
-  v.m_type = ValueType::Stream;
-  v.m_val.stream = s;
-  return v;
-}
-
-Value Value::new_error(Error *e) {
-  Value v;
-  v.m_type = ValueType::Error;
-  v.m_val.err = e;
-  return v;
-}
+using namespace liscpp;
 
 // Overloads //////////////////////////////////////////////////////////////////
 
@@ -114,24 +26,32 @@ bool Value::operator==(const Value &other) const {
   case ValueType::Float:
     return other.is_float() and as_flt() == other.as_flt();
   case ValueType::Keyword:
-    return other.is_keyword() and as_key() == other.as_key();
+    return other.is_float() and as_flt() == other.as_flt();
+  case ValueType::Symbol:
+    return other.is_symbol() and as_symbol() == other.as_symbol();
   case ValueType::String:
     return other.is_string() and *as_str() == *other.as_str();
+  case ValueType::List:
+    return other.is_list() and *as_list() == *other.as_list();
   case ValueType::Vector:
     return other.is_vector() and *as_vector() == *other.as_vector();
+  case ValueType::Map:
+    return other.is_map() and *as_map() == *other.as_map();
+  case ValueType::Generator:
+    return other.is_generator() and as_generator() == other.as_generator();
   case ValueType::Fn:
-    return other.is_fn() and *as_fn() == *other.as_fn();
+    return other.is_fn() and as_fn() == other.as_fn();
   case ValueType::Stream:
     return other.is_stream() and as_stream() == other.as_stream();
   case ValueType::Error:
-    return other.is_error() and *as_error() == *other.as_error();
+    return other.is_error() and as_error() == other.as_error();
   }
-  throw type::throw_uncovered_type("Value::operator==", int(m_type));
+  return false;
 }
 
 // Representations ////////////////////////////////////////////////////////////
 
-void Value::to_external(std::ostream &os) const {
+void Value::code_rep(std::ostream &os) const {
   switch (m_type) {
   case ValueType::Nil:
     os << "nil";
@@ -140,7 +60,7 @@ void Value::to_external(std::ostream &os) const {
     os << (as_bool() ? "true" : "false");
     break;
   case ValueType::Char:
-    os << as_char();
+    os << "#\\" << as_char();
     break;
   case ValueType::Int:
     os << as_int();
@@ -148,56 +68,77 @@ void Value::to_external(std::ostream &os) const {
   case ValueType::Float:
     os << as_flt();
     break;
+  case ValueType::Symbol:
+    os << as_symbol();
+    break;
   case ValueType::Keyword:
     os << as_key();
     break;
   case ValueType::String:
-    os << '"' << *as_str() << '"';
+    __type__::code_rep(os, *as_str());
     break;
-  case ValueType::Vector: {
-    GcVector *v = as_vector();
-    os << "[";
-    if (v->size() > 0) {
-      for (auto it = v->begin(); it != v->end() - 1; ++it) {
-        os << *it << ", ";
-      }
-      os << v->back();
-    }
-    os << "]";
+  case ValueType::List:
+    as_list()->code_rep(os);
     break;
-  }
-  case ValueType::Fn: {
-    // TODO should we add mod names to Fn as well ???
-    Fn *f = as_fn();
-    os << "#<Fn: " << f->get_name() << "(" << f->get_arity() << ")"
-       << ">";
+  case ValueType::Vector:
+    __type__::code_rep(os, *as_vector());
     break;
-  }
-  case ValueType::Closure:
-    // TODO fix if closure has more data that can be used
-    os << "#<Closure>";
+  case ValueType::Map:
+    __type__::code_rep(os, *as_map());
     break;
-  case ValueType::Stream: {
-    Stream *s = as_stream();
-    os << "#<Stream: " << s->get_type() << ">";
+  case ValueType::Generator:
+    as_generator()->code_rep(os);
     break;
-  }
+  case ValueType::Fn:
+    as_fn()->code_rep(os);
+    break;
+  case ValueType::Stream:
+    as_stream()->code_rep(os);
+    break;
   case ValueType::Error:
-    // TODO overlaod error types with these output methods and give a nice
-    // representation of the error object.
-    os << "#<Error>";
+    as_error()->code_rep(os);
     break;
-  default:
-    throw type::throw_uncovered_type("Value::to_external", int(m_type));
   }
 }
 
-void Value::to_display(std::ostream &os) const {
-  // FIXME where display does not match external
-  return to_external(os);
-}
-
-std::ostream &operator<<(std::ostream &os, const Value &value) {
-  value.to_external(os);
-  return os;
+void Value::display_rep(std::ostream &os) const {
+  return code_rep(os);
+  switch (m_type) {
+  case ValueType::Nil:
+  case ValueType::Bool:
+  case ValueType::Int:
+  case ValueType::Float:
+  case ValueType::Symbol:
+  case ValueType::Keyword:
+    code_rep(os);
+    break;
+  // Differ from code_rep or have their own rep functions
+  case ValueType::Char:
+    os << as_char();
+    break;
+  case ValueType::String:
+    __type__::display_rep(os, *as_str());
+    break;
+  case ValueType::List:
+    as_list()->display_rep(os);
+    break;
+  case ValueType::Vector:
+    __type__::display_rep(os, *as_vector());
+    break;
+  case ValueType::Map:
+    __type__::display_rep(os, *as_map());
+    break;
+  case ValueType::Generator:
+    as_generator()->display_rep(os);
+    break;
+  case ValueType::Fn:
+    as_fn()->display_rep(os);
+    break;
+  case ValueType::Stream:
+    as_stream()->display_rep(os);
+    break;
+  case ValueType::Error:
+    as_error()->display_rep(os);
+    break;
+  }
 }

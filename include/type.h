@@ -1,8 +1,39 @@
 #ifndef LISCPP_TYPE_H
 #define LISCPP_TYPE_H
 
+#include <gc/gc_allocator.h>
+#include <iostream>
+#include <map>
+#include <sstream>
 #include <stdexcept>
 #include <string>
+#include <vector>
+
+namespace liscpp {
+
+class Value;
+
+// Typedefs to use gc_allocator with built in types
+// TODO add these for streams as well???
+// TODO add operator<< overloads for the custom types, which will not have them
+// built into C++
+
+typedef std::vector<Value, gc_allocator<Value>> GcVector;
+
+typedef std::map<Value, Value, gc_allocator<Value>> GcMap;
+
+typedef std::basic_string<char, std::char_traits<char>, gc_allocator<char>>
+    GcString;
+
+typedef std::basic_ostringstream<char, std::char_traits<char>,
+                                 gc_allocator<char>>
+    GcOsStream;
+
+typedef std::basic_istringstream<char, std::char_traits<char>,
+                                 gc_allocator<char>>
+    GcIsStream;
+
+// Type enums for types using unions //////////////////////////////////////////
 
 enum class ValueType {
   // Primitive
@@ -19,10 +50,9 @@ enum class ValueType {
   List,
   Vector,
   Map,
-  Iterator,
+  Generator,
   // Function
   Fn,
-  Closure,
   // Other
   Stream,
   Error,
@@ -36,6 +66,7 @@ enum class FnType {
   Fn4,
   Fn5,
   FnAny,
+  Closure,
 };
 
 enum class StreamType {
@@ -45,16 +76,55 @@ enum class StreamType {
   OutFile,
 };
 
-namespace type {
-std::string str(ValueType);
-std::string str(FnType);
-std::string str(StreamType);
+enum class FileOp {
+  Read,
+  Write,
+  Open,
+  Close,
+};
+
+enum class ErrorType {
+  Error,
+  Arity,
+  InvalidArg,
+  OutOfBounds,
+  Panic,
+  File,
+  IO,
+};
+
+// Type Functions and Ostream Overloads ///////////////////////////////////////
+
+namespace __type__ {
+
+GcString str(ValueType);
+GcString str(FnType);
+GcString str(StreamType);
+GcString str(FileOp);
+GcString str(ErrorType);
+
+void code_rep(std::ostream &, const GcString &);
+void code_rep(std::ostream &, const GcVector &);
+void code_rep(std::ostream &, const GcMap &);
+
+void display_rep(std::ostream &, const GcString &);
+void display_rep(std::ostream &, const GcVector &);
+void display_rep(std::ostream &, const GcMap &);
+
 std::invalid_argument throw_uncovered_type(const std::string &where,
                                            int type_as_int);
-} // namespace type
+} // namespace __type__
 
-std::ostream &operator<<(std::ostream &, const ValueType &);
-std::ostream &operator<<(std::ostream &, const FnType &);
-std::ostream &operator<<(std::ostream &, const StreamType &);
+} // namespace liscpp
+
+std::ostream &operator<<(std::ostream &, const liscpp::GcString &);
+std::ostream &operator<<(std::ostream &, const liscpp::GcVector &);
+std::ostream &operator<<(std::ostream &, const liscpp::GcMap &);
+
+std::ostream &operator<<(std::ostream &, const liscpp::ValueType &);
+std::ostream &operator<<(std::ostream &, const liscpp::FnType &);
+std::ostream &operator<<(std::ostream &, const liscpp::StreamType &);
+std::ostream &operator<<(std::ostream &, const liscpp::FileOp &);
+std::ostream &operator<<(std::ostream &, const liscpp::ErrorType &);
 
 #endif

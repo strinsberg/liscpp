@@ -1,45 +1,49 @@
 #include "error.h"
+#include "type.h"
 #include "value.h"
+#include "value_functions.h"
 #include <cstdint>
-#include <format>
+#include <iostream>
 
-Error::Error(const std::string &message, Value data, Value type)
-    : m_message{new GcString(message)}, m_type{type}, m_data{data} {
-  if (not m_type.is_keyword())
-    throw InvalidArgError(GcString("error"), GcString("Keyword"),
-                          GcString(type::str(m_type.get_type())), 2, m_type);
+using namespace liscpp;
+
+// Error Class Methods //
+
+const char *Error::what() const throw() { return m_message->c_str(); }
+
+void Error::code_rep(std::ostream &os) const {
+  os << "#<Error " << m_type << ">";
 }
 
-const char *Error::what() const throw() {
-  return m_message->c_str(); // TODO also some rep of data
+void Error::display_rep(std::ostream &os) const { os << m_message; }
+
+// Error Functions ////////////////////////////////////////////////////////////
+
+Error *__error__::new_arity_error(GcString *where, uint32_t expected,
+                                  uint32_t actual) {
+  GcOsStream oss;
+  oss << "Arity Error: " << where << " expects at least " << expected
+      << " args: Got " << actual;
+  return new Error(new GcString(oss.str()), ErrorType::Arity, Value());
 }
 
-bool Error::operator==(const Error &other) const {
-  return m_type == other.m_type and m_message == other.m_message and
-         m_data == other.m_data;
+Error *__error__::new_invalid_arg_error(GcString *where, uint32_t pos,
+                                        ValueType expected, ValueType actual) {
+  GcOsStream oss;
+  oss << "Invalid Argument Error: " << where << " expects argument #" << pos
+      << " to be of type " << expected << ": Got " << actual;
+  return new Error(new GcString(oss.str()), ErrorType::InvalidArg, Value());
 }
 
-ArityError::ArityError(const GcString &fn_name, uint32_t expected,
-                       uint32_t given)
-    : Error(std::format("Arity Error: {} expects at least {} args: Got {}",
-                        fn_name, expected, given),
-            Value::new_keyword(new GcString(":arity")), Value()) {}
+Error *__error__::new_file_error(GcString *where, FileOp type) {
+  GcOsStream oss;
+  oss << "File Error: operation " << type << " failed: '" << where << "'";
+  return new Error(new GcString(oss.str()), ErrorType::File,
+                   __value__::new_string(where));
+}
 
-InvalidArgError::InvalidArgError(const GcString &fn_name,
-                                 const GcString &expected,
-                                 const GcString &given, uint32_t pos,
-                                 Value data)
-    : Error(std::format(
-                "Invalid Argument Error: {} expects {} at position {}: Got {}",
-                fn_name, pos, expected, given),
-            Value::new_keyword(new GcString(":invalid-argument")), data) {}
-
-FileError::FileError(const GcString &filename, const GcString &operation,
-                     const GcString &what)
-    : Error(std::format("File Error: error {} file \"{}\": {}", filename,
-                        operation, what),
-            Value::new_keyword(new GcString(":file")), Value()) {}
-
-IoError::IoError(const GcString &message, Value stream)
-    : Error(std::format("Io Error: {}", message),
-            Value::new_keyword(new GcString(":io")), stream) {}
+Error *new_io_error(GcString *where, Value stream) {
+  GcOsStream oss;
+  oss << "Io Error: " << where << ": " << stream;
+  return new Error(new GcString(oss.str()), ErrorType::IO, stream);
+}

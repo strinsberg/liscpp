@@ -1,49 +1,35 @@
 #ifndef LISCPP_VALUE_H
 #define LISCPP_VALUE_H
 
+#include "rep.h"
 #include "type.h"
 #include <cstdint>
-#include <exception>
 #include <gc/gc_allocator.h>
-#include <stdexcept>
-#include <string>
-#include <vector>
 
+namespace liscpp {
+
+class List;
+class Generator;
 class Fn;
-class Error;
-class Closure;
 class Stream;
+class Error;
 
-class Value;
-typedef std::vector<Value, gc_allocator<Value>> GcVector;
-typedef std::basic_string<char, std::char_traits<char>, gc_allocator<char>>
-    GcString;
-
-class Value {
+class Value : Rep {
 public:
-  // type constructors
+  // Type constructors
+  // These can be ambiguous so call them through value function constructors
   Value() : m_type{ValueType::Nil}, m_val{.i = 0} {}
-
-  // Static type constructors.
-  // Trying to overload for all the types results in ambiguous overloads, so I
-  // either do this, functions, or a factory class.
-  static Value new_nil() { return Value(); }
-  static Value new_true();
-  static Value new_false();
-  static Value new_int(int64_t i);
-  static Value new_float(double d);
-  static Value new_char(char);
-  static Value new_symbol(GcString *);
-  static Value new_keyword(GcString *);
-  static Value new_string(GcString *);
-  // static Value List(List*);
-  static Value new_vector(GcVector *);
-  // static Value Map(std::map<Value, Value>*); // might not work without
-  // wrapper static Value Iterator(); // not sure yet
-  static Value new_fn(Fn *);
-  static Value new_closure(Closure *);
-  static Value new_stream(Stream *);
-  static Value new_error(Error *);
+  Value(bool b) : m_type{ValueType::Bool}, m_val{.b = b} {}
+  Value(int64_t i) : m_type{ValueType::Int}, m_val{.i = i} {}
+  Value(double d) : m_type{ValueType::Float}, m_val{.d = d} {}
+  Value(ValueType t, GcString *s) : m_type{t}, m_val{.str = s} {}
+  Value(List *l) : m_type{ValueType::List}, m_val{.list = l} {}
+  Value(GcVector *v) : m_type{ValueType::Vector}, m_val{.vec = v} {}
+  Value(GcMap *m) : m_type{ValueType::Map}, m_val{.map = m} {}
+  Value(Generator *g) : m_type{ValueType::Generator}, m_val{.gen = g} {}
+  Value(Fn *f) : m_type{ValueType::Fn}, m_val{.fn = f} {}
+  Value(Stream *s) : m_type{ValueType::Stream}, m_val{.stream = s} {}
+  Value(Error *e) : m_type{ValueType::Error}, m_val{.err = e} {}
 
   // predicates
   inline bool is_nil() const { return m_type == ValueType::Nil; }
@@ -57,9 +43,8 @@ public:
   inline bool is_list() const { return m_type == ValueType::List; }
   inline bool is_vector() const { return m_type == ValueType::Vector; }
   inline bool is_map() const { return m_type == ValueType::Map; }
-  inline bool is_iterator() const { return m_type == ValueType::Iterator; }
+  inline bool is_generator() const { return m_type == ValueType::Generator; }
   inline bool is_fn() const { return m_type == ValueType::Fn; }
-  inline bool is_closure() const { return m_type == ValueType::Closure; }
   inline bool is_stream() const { return m_type == ValueType::Stream; }
   inline bool is_error() const { return m_type == ValueType::Error; }
 
@@ -75,12 +60,11 @@ public:
   inline const GcString &as_key() const { return *m_val.str; }
   inline const GcString &as_symbol() const { return *m_val.str; }
   inline GcString *as_str() const { return m_val.str; }
-  // inline List *as_list() const { return m_val.list; }
+  inline List *as_list() const { return m_val.list; }
   inline GcVector *as_vector() const { return m_val.vec; }
-  // inline std::map<Value, Value> *as_map() const { return m_val.map; }
-  // inline Iterator *as_iterator() const { return m_val.iter; }
+  inline GcMap *as_map() const { return m_val.map; }
+  inline Generator *as_generator() const { return m_val.gen; }
   inline Fn *as_fn() const { return m_val.fn; }
-  inline Closure *as_closure() const { return m_val.closure; }
   inline Stream *as_stream() const { return m_val.stream; }
   inline Error *as_error() const { return m_val.err; }
 
@@ -95,8 +79,8 @@ public:
   bool operator!=(const Value &other) const { return !(*this == other); }
 
   // Representations
-  void to_external(std::ostream &os) const;
-  void to_display(std::ostream &os) const;
+  void display_rep(std::ostream &os) const override;
+  void code_rep(std::ostream &os) const override;
 
 private:
   ValueType m_type;
@@ -106,25 +90,16 @@ private:
     int64_t i;
     double d;
     GcString *str;
-    // List* list;
+    List *list;
     GcVector *vec;
-    // std::map<Value, Value>* map;
-    // Iterator* iter;
+    GcMap *map;
+    Generator *gen;
     Fn *fn;
-    Closure *closure;
     Stream *stream;
     Error *err;
   } m_val;
-
-  // Some private constructors can make it better to initialize through the
-  // static constructor functions, but in an environment that is not ambiguous.
-  // But if we make them all public it can get tricky with pointers sometimes
-  // being seen as int types etc. or an int literal being ambiguos with the
-  // double type.
-  Value(int64_t i) : m_type{ValueType::Int}, m_val{.i = i} {}
-  Value(double d) : m_type{ValueType::Float}, m_val{.d = d} {}
 };
 
-std::ostream &operator<<(std::ostream &os, const Value &value);
+} // namespace liscpp
 
 #endif

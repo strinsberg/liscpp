@@ -2,6 +2,7 @@ build
 .clj-kondo
 .lsp
 .cache
+OLD
 
 # Prerequisites
 *.d

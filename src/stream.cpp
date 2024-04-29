@@ -2,29 +2,8 @@
 #include "error.h"
 #include "type.h"
 #include "value.h"
-#include <format>
-#include <stdexcept>
 
-// NOTE I am not handling user errors in here, so any caller needs to handle
-// possible file errors to return useful errors to the user. If a C++ error is
-// encountered it is a library error and not a liscpp runtime error.
-
-Stream::Stream(const std::string &filename, StreamType type)
-    : m_type{type}, m_stream{.is = &std::cin} {
-  if (type == StreamType::InFile) {
-    auto ifs = new std::ifstream();
-    ifs->open(filename);
-    m_stream = {.ifs = ifs};
-  } else if (type == StreamType::OutFile) {
-    auto ofs = new std::ofstream();
-    ofs->open(filename);
-    m_stream = {.ofs = ofs};
-  } else {
-    throw std::invalid_argument(std::format(
-        "file stream must be created with InFile or OutFile: Got {}",
-        type::str(type)));
-  }
-}
+using namespace liscpp;
 
 Stream::~Stream() { close(); }
 
@@ -37,9 +16,8 @@ bool Stream::is_open() {
     return m_stream.ifs->is_open();
   case StreamType::OutFile:
     return m_stream.ofs->is_open();
-  default:
-    throw type::throw_uncovered_type("Stream::is_open", int(m_type));
   }
+  return false;
 }
 
 bool Stream::is_eof() {
@@ -52,9 +30,8 @@ bool Stream::is_eof() {
     return m_stream.ifs->eof();
   case StreamType::OutFile:
     return m_stream.ofs->eof();
-  default:
-    throw type::throw_uncovered_type("Stream::is_eof", int(m_type));
   }
+  return true;
 }
 
 void Stream::close() {
@@ -75,9 +52,36 @@ GcString *Stream::get_line() {
     std::getline(*m_stream.ifs, *str);
     return str;
   default:
-    throw std::invalid_argument(
-        std::format("invalid stream for Stream::get_line: Expected "
-                    "StreamType::Input or Stream::InFile: Got {}",
-                    type::str(this->m_type)));
+    throw __error__::new_io_error(
+        new GcString("cannot get line from an output stream"), Value(this));
+  }
+}
+
+void Stream::code_rep(std::ostream &os) const {
+  // TODO would be fun to be able to see the position and number of bytes
+  os << "#<Stream: " << __type__::str(m_type) << ">";
+}
+
+void Stream::display_rep(std::ostream &os) const { code_rep(os); }
+
+// Stream functions ///////////////////////////////////////////////////////////
+
+Stream *__stream__::new_ifstream(GcString *filename) {
+  try {
+    auto ifs = new std::ifstream(filename->c_str());
+    ifs->exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    return new Stream(ifs);
+  } catch (...) {
+    throw __error__::new_file_error(filename, FileOp::Open);
+  }
+}
+
+Stream *__stream__::new_ofstream(GcString *filename) {
+  try {
+    auto ifs = new std::ifstream(filename->c_str());
+    ifs->exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    return new Stream(ifs);
+  } catch (...) {
+    throw __error__::new_file_error(filename, FileOp::Open);
   }
 }

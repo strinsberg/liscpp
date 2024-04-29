@@ -1,12 +1,15 @@
 #ifndef LISCPP_STREAM_H
 #define LISCPP_STREAM_H
 
+#include "rep.h"
 #include "type.h"
 #include "value.h"
 #include <fstream>
 #include <iostream>
 
-class Stream {
+namespace liscpp {
+
+class Stream : public Rep {
 public:
   Stream(std::istream *in) : m_type{StreamType::Input}, m_stream{.is = in} {}
   Stream(std::ostream *out) : m_type{StreamType::Output}, m_stream{.os = out} {}
@@ -24,6 +27,10 @@ public:
   void close();
   GcString *get_line();
 
+  // Representation
+  void code_rep(std::ostream &) const override;
+  void display_rep(std::ostream &) const override;
+
 private:
   StreamType m_type;
   union {
@@ -33,5 +40,16 @@ private:
     std::ofstream *ofs;
   } m_stream;
 };
+
+// Stream functions //
+
+namespace __stream__ {
+
+Stream *new_ifstream(GcString *);
+Stream *new_ofstream(GcString *);
+
+} // namespace __stream__
+
+} // namespace liscpp
 
 #endif

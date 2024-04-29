@@ -1,101 +1,219 @@
 #include "type.h"
+#include "value.h"
 #include <exception>
-#include <format>
+#include <iomanip>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 
-std::invalid_argument type::throw_uncovered_type(const std::string &where,
-                                                 int type_as_int) {
-  return std::invalid_argument(std::format(
-      "in {} found uncovered enum type: Type as int = {}", where, type_as_int));
-}
+using namespace liscpp;
 
-std::string type::str(ValueType t) {
+GcString str(ValueType t) {
   switch (t) {
   case ValueType::Nil:
-    return "ValueType::Nil";
+    return "#t:nil";
   case ValueType::Bool:
-    return "ValueType::Bool";
+    return "#t:bool";
   case ValueType::Char:
-    return "ValueType::Char";
+    return "#t:char";
   case ValueType::Int:
-    return "ValueType::Int";
+    return "#t:int";
   case ValueType::Float:
-    return "ValueType::Float";
+    return "#t:float";
   case ValueType::Symbol:
-    return "ValueType::Symbol";
+    return "#t:symbol";
   case ValueType::Keyword:
-    return "ValueType::Keyword";
+    return "#t:keyword";
   case ValueType::String:
-    return "ValueType::String";
+    return "#t:string";
   case ValueType::List:
-    return "ValueType::List";
+    return "#t:list";
   case ValueType::Vector:
-    return "ValueType::Vector";
+    return "#t:vector";
   case ValueType::Map:
-    return "ValueType::Map";
-  case ValueType::Iterator:
-    return "ValueType::Iterator";
+    return "#t:map";
+  case ValueType::Generator:
+    return "#t:generator";
   case ValueType::Fn:
-    return "ValueType::Fn";
-  case ValueType::Closure:
-    return "ValueType::Closure";
+    return "#t:function";
   case ValueType::Stream:
-    return "ValueType::Stream";
+    return "#t:stream";
   case ValueType::Error:
-    return "ValueType::Error";
-  default:
-    throw type::throw_uncovered_type("type::str(ValueType)", int(t));
+    return "#t:error";
   }
+  return "**UNCOVERED-TYPE**";
 }
 
-std::string type::str(FnType t) {
+GcString str(FnType t) {
   switch (t) {
   case FnType::Fn0:
-    return "FnType::Fn0";
+    return "#t:function-fn0";
   case FnType::Fn1:
-    return "FnType::Fn1";
+    return "#t:function-fn1";
   case FnType::Fn2:
-    return "FnType::Fn2";
+    return "#t:function-fn2";
   case FnType::Fn3:
-    return "FnType::Fn3";
+    return "#t:function-fn3";
   case FnType::Fn4:
-    return "FnType::Fn4";
+    return "#t:function-fn4";
   case FnType::Fn5:
-    return "FnType::Fn5";
+    return "#t:function-fn5";
   case FnType::FnAny:
-    return "FnType::FnAny";
-  default:
-    throw type::throw_uncovered_type("type::str(FnType)", int(t));
+    return "#t:function-fn-any";
+  case FnType::Closure:
+    return "#t:function-closure";
   }
+  return "**UNCOVERED-TYPE**";
 }
 
-std::string type::str(StreamType t) {
+GcString str(StreamType t) {
   switch (t) {
   case StreamType::Input:
-    return "StreamType::Input";
+    return "#t:stream-input";
   case StreamType::Output:
-    return "StreamType::Output";
+    return "#t:stream-output";
   case StreamType::InFile:
-    return "StreamType::InFile";
+    return "#t:stream-ifile";
   case StreamType::OutFile:
-    return "StreamType::OutFile";
-  default:
-    throw type::throw_uncovered_type("type::str(StreamType)", int(t));
+    return "#t:stream-ofile";
   }
+  return "**UNCOVERED-TYPE**";
+}
+
+GcString str(FileOp t) {
+  switch (t) {
+  case FileOp::Open:
+    return "#t:fileop-open";
+  case FileOp::Close:
+    return "#t:fileop-close";
+  case FileOp::Read:
+    return "#t:fileop-read";
+  case FileOp::Write:
+    return "#t:fileop-write";
+  }
+  return "**UNCOVERED-TYPE**";
+}
+
+GcString str(ErrorType t) {
+  switch (t) {
+  case ErrorType::Error:
+    return "#t:error-base";
+  case ErrorType::Arity:
+    return "#t:error-arity";
+  case ErrorType::InvalidArg:
+    return "#t:error-invalid-argument";
+  case ErrorType::OutOfBounds:
+    return "#t:error-out-of-bounds";
+  case ErrorType::File:
+    return "#t:error-file";
+  case ErrorType::IO:
+    return "#t:error-io";
+  case ErrorType::Panic:
+    return "#t:error-panic";
+  }
+  return "**UNCOVERED-TYPE**";
+}
+
+// Typedefed Representations //////////////////////////////////////////////////
+
+void __type__::code_rep(std::ostream &os, const GcString &s) {
+  // TODO this will not fully escape the string, it will print quotes around it
+  // and escape internal quotes.
+  os << std::quoted(s);
+}
+
+void __type__::code_rep(std::ostream &os, const GcVector &v) {
+  os << "[";
+  if (v.size() > 0) {
+    for (auto it = v.begin(); it != v.end() - 1; ++it) {
+      (*it).code_rep(os);
+      os << " ";
+    }
+    v.back().code_rep(os);
+  }
+  os << "]";
+}
+
+void __type__::code_rep(std::ostream &os, const GcMap &m) {
+  os << "{";
+  uint32_t i = 0;
+  for (auto it = m.begin(); it != m.end(); ++it) {
+    it->first.code_rep(os);
+    os << " ";
+    it->second.code_rep(os);
+    if (i < m.size() - 1)
+      os << " ";
+    i++;
+  }
+  os << "}";
+}
+
+void __type__::display_rep(std::ostream &os, const GcString &s) { os << s; }
+
+void __type__::display_rep(std::ostream &os, const GcVector &v) {
+  os << "[";
+  if (v.size() > 0) {
+    for (auto it = v.begin(); it != v.end() - 1; ++it) {
+      (*it).display_rep(os);
+      os << " ";
+    }
+    v.back().display_rep(os);
+  }
+  os << "]";
+}
+
+void __type__::display_rep(std::ostream &os, const GcMap &m) {
+  os << "{";
+  uint32_t i = 0;
+  for (auto it = m.begin(); it != m.end(); ++it) {
+    it->first.display_rep(os);
+    os << " ";
+    it->second.display_rep(os);
+    if (i < m.size() - 1)
+      os << " ";
+    i++;
+  }
+  os << "}";
+}
+
+// Overload ostream ///////////////////////////////////////////////////////////
+
+std::ostream &operator<<(std::ostream &os, const liscpp::GcString &s) {
+  __type__::display_rep(os, s);
+  return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const liscpp::GcVector &v) {
+  __type__::display_rep(os, v);
+  return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const liscpp::GcMap &m) {
+  __type__::display_rep(os, m);
+  return os;
 }
 
 std::ostream &operator<<(std::ostream &os, const ValueType &type) {
-  os << type::str(type);
+  os << str(type);
   return os;
 }
 
 std::ostream &operator<<(std::ostream &os, const FnType &type) {
-  os << type::str(type);
+  os << str(type);
   return os;
 }
 
 std::ostream &operator<<(std::ostream &os, const StreamType &type) {
-  os << type::str(type);
+  os << str(type);
+  return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const ErrorType &type) {
+  os << str(type);
+  return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const FileOp &type) {
+  os << str(type);
   return os;
 }
