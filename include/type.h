@@ -12,6 +12,7 @@
 namespace liscpp {
 
 class Value;
+class Fn;
 
 // Typedefs to use gc_allocator with built in types
 // TODO add these for streams as well???
@@ -20,7 +21,9 @@ class Value;
 
 typedef std::vector<Value, gc_allocator<Value>> GcVector;
 
-typedef std::map<Value, Value, gc_allocator<Value>> GcMap;
+typedef std::map<Value, Value, std::less<Value>,
+                 gc_allocator<std::pair<const Value, Value>>>
+    GcMap;
 
 typedef std::basic_string<char, std::char_traits<char>, gc_allocator<char>>
     GcString;

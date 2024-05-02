@@ -1,7 +1,6 @@
 #ifndef LISCPP_GENERATOR_H
 #define LISCPP_GENERATOR_H
 
-#include "fn.h"
 #include "rep.h"
 #include "type.h"
 

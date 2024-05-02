@@ -7,15 +7,23 @@
 
 using namespace liscpp;
 
+Error::Error(GcString *message, ErrorType type, Value data)
+    : m_message{message}, m_type{type}, m_data{data} {}
+
 // Error Class Methods //
 
 const char *Error::what() const throw() { return m_message->c_str(); }
+
+bool Error::operator==(const Error &other) const {
+  return *m_message == *other.m_message and m_data == other.m_data and
+         m_type == other.m_type;
+}
 
 void Error::code_rep(std::ostream &os) const {
   os << "#<Error " << m_type << ">";
 }
 
-void Error::display_rep(std::ostream &os) const { os << m_message; }
+void Error::display_rep(std::ostream &os) const { os << *m_message; }
 
 // Error Functions ////////////////////////////////////////////////////////////
 
@@ -42,7 +50,7 @@ Error *__error__::new_file_error(GcString *where, FileOp type) {
                    __value__::new_string(where));
 }
 
-Error *new_io_error(GcString *where, Value stream) {
+Error *__error__::new_io_error(GcString *where, Value stream) {
   GcOsStream oss;
   oss << "Io Error: " << where << ": " << stream;
   return new Error(new GcString(oss.str()), ErrorType::IO, stream);

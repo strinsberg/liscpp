@@ -66,8 +66,8 @@ Value new_fn(const char *, Value (*)(Value, Value));
 Value new_fn(const char *, Value (*)(Value, Value, Value));
 Value new_fn(const char *, Value (*)(Value, Value, Value, Value));
 Value new_fn(const char *, Value (*)(Value, Value, Value, Value, Value));
-Value new_fn(const char *, Value (*)(const Value[], uint32_t));
-Value new_closure(const char *, GcVector,
+Value new_fn(const char *, uint32_t, Value (*)(const Value[], uint32_t));
+Value new_closure(const char *, GcVector, uint32_t,
                   Value(GcVector *, const Value[], uint32_t));
 
 // Stream

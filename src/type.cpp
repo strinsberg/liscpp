@@ -8,7 +8,7 @@
 
 using namespace liscpp;
 
-GcString str(ValueType t) {
+GcString __type__::str(ValueType t) {
   switch (t) {
   case ValueType::Nil:
     return "#t:nil";
@@ -44,7 +44,7 @@ GcString str(ValueType t) {
   return "**UNCOVERED-TYPE**";
 }
 
-GcString str(FnType t) {
+GcString __type__::str(FnType t) {
   switch (t) {
   case FnType::Fn0:
     return "#t:function-fn0";
@@ -66,7 +66,7 @@ GcString str(FnType t) {
   return "**UNCOVERED-TYPE**";
 }
 
-GcString str(StreamType t) {
+GcString __type__::str(StreamType t) {
   switch (t) {
   case StreamType::Input:
     return "#t:stream-input";
@@ -80,7 +80,7 @@ GcString str(StreamType t) {
   return "**UNCOVERED-TYPE**";
 }
 
-GcString str(FileOp t) {
+GcString __type__::str(FileOp t) {
   switch (t) {
   case FileOp::Open:
     return "#t:fileop-open";
@@ -94,7 +94,7 @@ GcString str(FileOp t) {
   return "**UNCOVERED-TYPE**";
 }
 
-GcString str(ErrorType t) {
+GcString __type__::str(ErrorType t) {
   switch (t) {
   case ErrorType::Error:
     return "#t:error-base";
@@ -220,26 +220,26 @@ std::ostream &operator<<(std::ostream &os, const liscpp::GcMap &m) {
 }
 
 std::ostream &operator<<(std::ostream &os, const ValueType &type) {
-  os << str(type);
+  os << __type__::str(type);
   return os;
 }
 
 std::ostream &operator<<(std::ostream &os, const FnType &type) {
-  os << str(type);
+  os << __type__::str(type);
   return os;
 }
 
 std::ostream &operator<<(std::ostream &os, const StreamType &type) {
-  os << str(type);
+  os << __type__::str(type);
   return os;
 }
 
 std::ostream &operator<<(std::ostream &os, const ErrorType &type) {
-  os << str(type);
+  os << __type__::str(type);
   return os;
 }
 
 std::ostream &operator<<(std::ostream &os, const FileOp &type) {
-  os << str(type);
+  os << __type__::str(type);
   return os;
 }

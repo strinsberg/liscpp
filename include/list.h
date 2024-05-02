@@ -16,6 +16,7 @@ public:
   inline List *get_next() { return m_next; }
 
   bool operator==(const List &other) const;
+  bool operator<(const List &other) const;
 
   void code_rep(std::ostream &os) const override;
   void display_rep(std::ostream &os) const override;

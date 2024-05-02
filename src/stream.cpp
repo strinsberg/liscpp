@@ -1,6 +1,7 @@
 #include "stream.h"
 #include "error.h"
 #include "type.h"
+#include "util.h"
 #include "value.h"
 
 using namespace liscpp;
@@ -54,12 +55,13 @@ GcString *Stream::get_line() {
   default:
     throw __error__::new_io_error(
         new GcString("cannot get line from an output stream"), Value(this));
+    break;
   }
 }
 
 void Stream::code_rep(std::ostream &os) const {
   // TODO would be fun to be able to see the position and number of bytes
-  os << "#<Stream: " << __type__::str(m_type) << ">";
+  os << "#<Stream " << m_type << ">";
 }
 
 void Stream::display_rep(std::ostream &os) const { code_rep(os); }

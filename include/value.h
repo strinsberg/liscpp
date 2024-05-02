@@ -78,6 +78,8 @@ public:
   // Overloads
   bool operator==(const Value &other) const;
   bool operator!=(const Value &other) const { return !(*this == other); }
+  bool operator<(const Value&other) const;
+  bool operator>(const Value&other) const { return !(*this == other or *this < other); }
 
   // Representations
   void display_rep(std::ostream &os) const override;

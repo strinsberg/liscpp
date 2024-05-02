@@ -11,8 +11,7 @@ namespace liscpp {
 
 class Error : public std::exception, public Rep {
 public:
-  Error(GcString *message, ErrorType type, Value data)
-      : m_message{message}, m_type{type}, m_data{data} {}
+  Error(GcString *message, ErrorType type, Value data);
 
   // Accessors
   inline ErrorType get_type() const { return m_type; }
@@ -21,11 +20,14 @@ public:
   // Overrides
   const char *what() const throw() override;
 
+  // Overloads
+  bool operator==(const Error &) const;
+
   // Representation
   void code_rep(std::ostream &) const override;
   void display_rep(std::ostream &) const override;
 
-protected:
+private:
   GcString *m_message;
   ErrorType m_type;
   Value m_data;

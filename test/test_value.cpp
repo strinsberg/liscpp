@@ -1,8 +1,15 @@
+#include "list.h"
 #include "type.h"
 #include "value.h"
+#include "generator.h"
+#include "stream.h"
+#include "fn.h"
+#include "error.h"
 #include <gtest/gtest.h>
 
 using namespace liscpp;
+
+Value test_fn() { return Value(); }
 
 // These tests should just test the basic methods and nothing else, as much as
 // is possible given the dependence Value has on all the other types.
@@ -351,32 +358,223 @@ TEST(ValueString, representation) {
   EXPECT_EQ(oss.str(), "\"hello \\\"world\\\"\"");
 }
 
-// FIXME //////////////////////////////////////////////////////////////////////
+// List ///////////////////////////////////////////////////////////////////////
 
-TEST(Value, accessors) {
-  Value v;
+// NOTE I am going to use concrete obejcts for all the custom types, but they
+// should be relied on as minimally as possible for their implementations. I.e.
+// when testing things like equality and representations keep the tests as
+// simple as is necessary to test the Value and not the underlying type.
 
-  EXPECT_TRUE(v.is_nil());
-  EXPECT_EQ(v.get_type(), ValueType::Nil);
-  EXPECT_FALSE(v.is_truthy());
+TEST(ValueList, accessors) {
+  Value v(new List());
+
+  EXPECT_FALSE(v.is_nil());
+  EXPECT_EQ(v.get_type(), ValueType::List);
+  EXPECT_TRUE(v.is_truthy());
 }
 
-TEST(Value, equality) {
-  Value v;
+TEST(ValueList, equality) {
+  Value v(new List(Value(int64_t(5)), nullptr));
 
   EXPECT_EQ(v, v);
-  EXPECT_EQ(v, Value());
+  EXPECT_EQ(v, Value(new List(Value(int64_t(5)), nullptr)));
+  EXPECT_NE(v, Value(new List()));
   EXPECT_NE(v, Value(int64_t(0)));
 }
 
-TEST(Value, representation) {
-  Value v;
+TEST(ValueList, representation) {
+  Value v(new List(Value(ValueType::String, new GcString("hello \"me\"")),
+                   nullptr));
   GcOsStream oss;
 
   v.display_rep(oss);
-  EXPECT_EQ(oss.str(), "nil");
+  EXPECT_EQ(oss.str(), "(hello \"me\")");
 
   oss.str("");
   v.code_rep(oss);
-  EXPECT_EQ(oss.str(), "nil");
+  EXPECT_EQ(oss.str(), "(\"hello \\\"me\\\"\")");
+}
+
+// Vector /////////////////////////////////////////////////////////////////////
+
+TEST(ValueVector, accessors) {
+  Value v(new GcVector{Value(int64_t(42))});
+
+  EXPECT_FALSE(v.is_nil());
+  EXPECT_EQ(v.get_type(), ValueType::Vector);
+  EXPECT_TRUE(v.is_truthy());
+}
+
+TEST(ValueVector, equality) {
+  Value v(new GcVector{Value(int64_t(42))});
+
+  EXPECT_EQ(v, v);
+  EXPECT_EQ(v, Value(new GcVector{Value(int64_t(42))}));
+  EXPECT_NE(v, Value(new GcVector()));
+  EXPECT_NE(v, Value(int64_t(0)));
+}
+
+TEST(ValueVector, representation) {
+  Value v(new GcVector{Value(ValueType::String, new GcString("hello \"me\""))});
+  GcOsStream oss;
+
+  v.display_rep(oss);
+  EXPECT_EQ(oss.str(), "[hello \"me\"]");
+
+  oss.str("");
+  v.code_rep(oss);
+  EXPECT_EQ(oss.str(), "[\"hello \\\"me\\\"\"]");
+}
+
+// Map ////////////////////////////////////////////////////////////////////////
+
+TEST(ValueMap, accessors) {
+  Value v(new GcMap{{Value(int64_t(42)), Value()}});
+
+  EXPECT_FALSE(v.is_nil());
+  EXPECT_EQ(v.get_type(), ValueType::Map);
+  EXPECT_TRUE(v.is_truthy());
+}
+
+TEST(ValueMap, equality) {
+  Value v(new GcMap{{Value(int64_t(42)), Value()}});
+
+  EXPECT_EQ(v, v);
+  EXPECT_EQ(v, Value(new GcMap{{Value(int64_t(42)), Value()}}));
+  EXPECT_NE(v, Value(new GcMap()));
+  EXPECT_NE(v, Value(int64_t(0)));
+}
+
+TEST(ValueMap, representation) {
+  Value v(new GcMap{{Value(int64_t(42)),
+                     Value(ValueType::String, new GcString("hello \"me\""))}});
+  GcOsStream oss;
+
+  v.display_rep(oss);
+  EXPECT_EQ(oss.str(), "{42 hello \"me\"}");
+
+  oss.str("");
+  v.code_rep(oss);
+  EXPECT_EQ(oss.str(), "{42 \"hello \\\"me\\\"\"}");
+}
+
+// Generator //////////////////////////////////////////////////////////////////
+
+TEST(ValueGenerator, accessors) {
+  Value v(new Generator(nullptr, nullptr));
+
+  EXPECT_FALSE(v.is_nil());
+  EXPECT_EQ(v.get_type(), ValueType::Generator);
+  EXPECT_TRUE(v.is_truthy());
+}
+
+TEST(ValueGenerator, equality) {
+  Value v(new Generator(nullptr, nullptr));
+
+  EXPECT_EQ(v, v);
+  EXPECT_NE(v, Value(new Generator(nullptr, nullptr)));
+  EXPECT_NE(v, Value(int64_t(0)));
+}
+
+TEST(ValueGenerator, representation) {
+  Value v(new Generator(nullptr, nullptr));
+  GcOsStream oss;
+
+  v.display_rep(oss);
+  EXPECT_EQ(oss.str(), "#<Generator>");
+
+  oss.str("");
+  v.code_rep(oss);
+  EXPECT_EQ(oss.str(), "#<Generator>");
+}
+
+// Fn /////////////////////////////////////////////////////////////////////////
+
+TEST(ValueFn, accessors) {
+  Value v(new Fn(new GcString("test_fn"), test_fn));
+
+  EXPECT_FALSE(v.is_nil());
+  EXPECT_EQ(v.get_type(), ValueType::Fn);
+  EXPECT_TRUE(v.is_truthy());
+}
+
+TEST(ValueFn, equality) {
+  Value v(new Fn(new GcString("test_fn"), test_fn));
+
+  EXPECT_EQ(v, v);
+  EXPECT_NE(v, Value(new Fn(new GcString("test_fn"), test_fn)));
+  EXPECT_NE(v, Value(int64_t(0)));
+}
+
+TEST(ValueFn, representation) {
+  Value v(new Fn(new GcString("test_fn"), test_fn));
+  GcOsStream oss;
+
+  v.display_rep(oss);
+  EXPECT_EQ(oss.str(), "#<Fn #t:function-fn0 test_fn>");
+
+  oss.str("");
+  v.code_rep(oss);
+  EXPECT_EQ(oss.str(), "#<Fn #t:function-fn0 test_fn>");
+}
+
+// FIXME //////////////////////////////////////////////////////////////////////
+
+TEST(ValueStream, accessors) {
+  Value v(new Stream(std::cout));
+
+  EXPECT_FALSE(v.is_nil());
+  EXPECT_EQ(v.get_type(), ValueType::Stream);
+  EXPECT_TRUE(v.is_truthy());
+}
+
+TEST(ValueStream, equality) {
+  Value v(new Stream(std::cout));
+
+  EXPECT_EQ(v, v);
+  EXPECT_NE(v, Value(new Stream(std::cout)));
+  EXPECT_NE(v, Value(int64_t(0)));
+}
+
+TEST(ValueStream, representation) {
+  Value v(new Stream(std::cout));
+  GcOsStream oss;
+
+  v.display_rep(oss);
+  EXPECT_EQ(oss.str(), "#<Stream #t:stream-output>");
+
+  oss.str("");
+  v.code_rep(oss);
+  EXPECT_EQ(oss.str(), "#<Stream #t:stream-output>");
+}
+
+// Error //////////////////////////////////////////////////////////////////////
+
+TEST(ValueError, accessors) {
+  Value v(new Error(new GcString("message"), ErrorType::Error, Value()));
+
+  EXPECT_FALSE(v.is_nil());
+  EXPECT_EQ(v.get_type(), ValueType::Error);
+  EXPECT_TRUE(v.is_truthy());
+}
+
+TEST(ValueError, equality) {
+  Value v(new Error(new GcString("message"), ErrorType::Error, Value()));
+
+  EXPECT_EQ(v, v);
+  EXPECT_EQ(v, Value(new Error(new GcString("message"), ErrorType::Error, Value())));
+  EXPECT_NE(v, Value(new Error(new GcString("message"), ErrorType::Arity, Value())));
+  EXPECT_NE(v, Value(int64_t(0)));
+}
+
+TEST(ValueError, representation) {
+  Value v(new Error(new GcString("message"), ErrorType::Error, Value()));
+  GcOsStream oss;
+
+  v.display_rep(oss);
+  EXPECT_EQ(oss.str(), "message");
+
+  oss.str("");
+  v.code_rep(oss);
+  EXPECT_EQ(oss.str(), "#<Error #t:error-base>");
 }

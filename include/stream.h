@@ -3,7 +3,6 @@
 
 #include "rep.h"
 #include "type.h"
-#include "value.h"
 #include <fstream>
 #include <iostream>
 

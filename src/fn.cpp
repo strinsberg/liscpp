@@ -1,8 +1,8 @@
 #include "fn.h"
-#include "value_functions.h"
 #include "error.h"
 #include "type.h"
 #include "value.h"
+#include "value_functions.h"
 #include <cstdint>
 #include <iostream>
 
@@ -68,12 +68,15 @@ Value Fn::operator()(const Value args[], uint32_t n) const {
     return m_fn.fn_closure(m_captures, args, n);
   }
   return Value(new Error(new GcString("**Uncovered FnType** in Fn::operator()"),
-                     ErrorType::Panic, Value(new Fn(*this))));
+                         ErrorType::Panic, Value(new Fn(*this))));
 }
 
 void Fn::code_rep(std::ostream &os) const {
-  os << "#<Fn::" << __type__::str(get_type()) << "(" << m_arity << ")"
-     << get_name() << ">";
+  os << "#<Fn " << get_type() << " " << get_name();
+  if (get_type() == FnType::FnAny or get_type() == FnType::Closure) {
+    os << "(" << m_arity << ")";
+  }
+  os << ">";
 }
 
 void Fn::display_rep(std::ostream &os) const { code_rep(os); }
