@@ -1,10 +1,10 @@
+#include "error.h"
+#include "fn.h"
+#include "generator.h"
 #include "list.h"
+#include "stream.h"
 #include "type.h"
 #include "value.h"
-#include "generator.h"
-#include "stream.h"
-#include "fn.h"
-#include "error.h"
 #include <gtest/gtest.h>
 
 using namespace liscpp;
@@ -562,8 +562,10 @@ TEST(ValueError, equality) {
   Value v(new Error(new GcString("message"), ErrorType::Error, Value()));
 
   EXPECT_EQ(v, v);
-  EXPECT_EQ(v, Value(new Error(new GcString("message"), ErrorType::Error, Value())));
-  EXPECT_NE(v, Value(new Error(new GcString("message"), ErrorType::Arity, Value())));
+  EXPECT_EQ(
+      v, Value(new Error(new GcString("message"), ErrorType::Error, Value())));
+  EXPECT_NE(
+      v, Value(new Error(new GcString("message"), ErrorType::Arity, Value())));
   EXPECT_NE(v, Value(int64_t(0)));
 }
 

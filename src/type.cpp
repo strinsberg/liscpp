@@ -24,6 +24,9 @@ using namespace liscpp;
 bool GcMapValueCompare::operator()(const Value &a, const Value &b) const {
   switch (a.get_type()) {
   case ValueType::Nil:
+    if (b.is_nil()) {
+      return false;
+    }
     return true;
   case ValueType::Bool:
     return compare_bool(a.as_bool(), b);
