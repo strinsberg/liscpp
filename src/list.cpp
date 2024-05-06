@@ -12,11 +12,6 @@ bool List::operator==(const List &other) const {
   return m_data == other.m_data && m_next == other.m_next;
 }
 
-bool List::operator<(const List &other) const {
-  // TODO again make this iterative
-  return m_data < other.m_data && m_next < other.m_next;
-}
-
 void List::code_rep(std::ostream &os) const {
   os << "(";
   const List *list = this;

@@ -1,4 +1,5 @@
 #include "type.h"
+#include "util.h"
 #include "value.h"
 #include <exception>
 #include <iomanip>
@@ -7,6 +8,302 @@
 #include <string>
 
 using namespace liscpp;
+
+// GcMapValueCompare //////////////////////////////////////////////////////////
+
+// This is a lot of code for something very simple, but it gives a consistent
+// comparisson for values in GcMap that are not equal. It should also be
+// consistent comp(a, b) and comp(b, a).
+// In code < will only work with numerical values, but this can also be used
+// for some kind of default sort for collections that might contain different
+// types. Though it might be good to template this or something like it to
+// allow for custom comparators for sort, but that might actually be better
+// using some other interface altogether, so that a user does not have to
+// specify relationships between types.
+
+bool GcMapValueCompare::operator()(const Value &a, const Value &b) const {
+  switch (a.get_type()) {
+  case ValueType::Nil:
+    return true;
+  case ValueType::Bool:
+    return compare_bool(a.as_bool(), b);
+  case ValueType::Char:
+    return compare_char(a.as_char(), b);
+  case ValueType::Int:
+    return compare_int(a.as_int(), b);
+  case ValueType::Float:
+    return compare_float(a.as_float(), b);
+  case ValueType::Keyword:
+    return compare_keyword(a.as_keyword(), b);
+  case ValueType::Symbol:
+    return compare_symbol(a.as_symbol(), b);
+  case ValueType::String:
+    return compare_string(a.as_string(), b);
+  case ValueType::List:
+    return compare_list(a.as_list(), b);
+  case ValueType::Vector:
+    return compare_vector(a.as_vector(), b);
+  case ValueType::Map:
+    return compare_map(a.as_map(), b);
+  case ValueType::Generator:
+    return compare_generator(a.as_generator(), b);
+  case ValueType::Fn:
+    return compare_fn(a.as_fn(), b);
+  case ValueType::Stream:
+    return compare_stream(a.as_stream(), b);
+  case ValueType::Error:
+    return compare_error(a.as_error(), b);
+  }
+  util::panic("uncovered type in GcMapCompare::operator()");
+  return false; // unreachable
+}
+
+bool GcMapValueCompare::compare_bool(bool a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::Bool:
+    return a < b.as_bool();
+  case ValueType::Nil:
+    return false;
+  default:
+    return true;
+  }
+}
+
+bool GcMapValueCompare::compare_char(char a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::Char:
+    return a < b.as_char();
+  case ValueType::Nil:
+  case ValueType::Bool:
+    return false;
+  default:
+    return true;
+  }
+}
+
+bool GcMapValueCompare::compare_int(int64_t a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::Int:
+    return a < b.as_int();
+  case ValueType::Nil:
+  case ValueType::Bool:
+  case ValueType::Char:
+    return false;
+  default:
+    return true;
+  }
+}
+
+bool GcMapValueCompare::compare_float(double a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::Float:
+    return a < b.as_float();
+  case ValueType::Nil:
+  case ValueType::Bool:
+  case ValueType::Char:
+  case ValueType::Int:
+    return false;
+  default:
+    return true;
+  }
+}
+
+bool GcMapValueCompare::compare_keyword(GcString *a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::Keyword:
+    return *a < *b.as_keyword();
+  case ValueType::Nil:
+  case ValueType::Bool:
+  case ValueType::Char:
+  case ValueType::Int:
+  case ValueType::Float:
+    return false;
+  default:
+    return true;
+  }
+}
+
+bool GcMapValueCompare::compare_symbol(GcString *a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::Symbol:
+    return *a < *b.as_symbol();
+  case ValueType::Nil:
+  case ValueType::Bool:
+  case ValueType::Char:
+  case ValueType::Int:
+  case ValueType::Float:
+  case ValueType::Keyword:
+    return false;
+  default:
+    return true;
+  }
+}
+
+bool GcMapValueCompare::compare_string(GcString *a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::String:
+    return *a < *b.as_string();
+  case ValueType::Nil:
+  case ValueType::Bool:
+  case ValueType::Char:
+  case ValueType::Int:
+  case ValueType::Float:
+  case ValueType::Keyword:
+  case ValueType::Symbol:
+    return false;
+  default:
+    return true;
+  }
+}
+
+bool GcMapValueCompare::compare_list(List *a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::List:
+    return a < b.as_list();
+  case ValueType::Nil:
+  case ValueType::Bool:
+  case ValueType::Char:
+  case ValueType::Int:
+  case ValueType::Float:
+  case ValueType::Keyword:
+  case ValueType::Symbol:
+  case ValueType::String:
+    return false;
+  default:
+    return true;
+  }
+}
+
+bool GcMapValueCompare::compare_vector(GcVector *a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::Vector:
+    return a < b.as_vector();
+  case ValueType::Nil:
+  case ValueType::Bool:
+  case ValueType::Char:
+  case ValueType::Int:
+  case ValueType::Float:
+  case ValueType::Keyword:
+  case ValueType::Symbol:
+  case ValueType::String:
+  case ValueType::List:
+    return false;
+  default:
+    return true;
+  }
+}
+
+bool GcMapValueCompare::compare_map(GcMap *a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::Map:
+    return a < b.as_map();
+  case ValueType::Nil:
+  case ValueType::Bool:
+  case ValueType::Char:
+  case ValueType::Int:
+  case ValueType::Float:
+  case ValueType::Keyword:
+  case ValueType::Symbol:
+  case ValueType::String:
+  case ValueType::List:
+  case ValueType::Vector:
+    return false;
+  default:
+    return true;
+  }
+}
+
+bool GcMapValueCompare::compare_generator(Generator *a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::Generator:
+    return a < b.as_generator();
+  case ValueType::Nil:
+  case ValueType::Bool:
+  case ValueType::Char:
+  case ValueType::Int:
+  case ValueType::Float:
+  case ValueType::Keyword:
+  case ValueType::Symbol:
+  case ValueType::String:
+  case ValueType::List:
+  case ValueType::Vector:
+  case ValueType::Map:
+    return false;
+  default:
+    return true;
+  }
+}
+
+bool GcMapValueCompare::compare_fn(Fn *a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::Fn:
+    return a < b.as_fn();
+  case ValueType::Nil:
+  case ValueType::Bool:
+  case ValueType::Char:
+  case ValueType::Int:
+  case ValueType::Float:
+  case ValueType::Keyword:
+  case ValueType::Symbol:
+  case ValueType::String:
+  case ValueType::List:
+  case ValueType::Vector:
+  case ValueType::Map:
+  case ValueType::Generator:
+    return false;
+  default:
+    return true;
+  }
+}
+
+bool GcMapValueCompare::compare_stream(Stream *a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::Stream:
+    return a < b.as_stream();
+  case ValueType::Nil:
+  case ValueType::Bool:
+  case ValueType::Char:
+  case ValueType::Int:
+  case ValueType::Float:
+  case ValueType::Keyword:
+  case ValueType::Symbol:
+  case ValueType::String:
+  case ValueType::List:
+  case ValueType::Vector:
+  case ValueType::Map:
+  case ValueType::Generator:
+  case ValueType::Fn:
+    return false;
+  default:
+    return true;
+  }
+}
+
+bool GcMapValueCompare::compare_error(Error *a, const Value &b) const {
+  switch (b.get_type()) {
+  case ValueType::Error:
+    return a < b.as_error();
+  case ValueType::Nil:
+  case ValueType::Bool:
+  case ValueType::Char:
+  case ValueType::Int:
+  case ValueType::Float:
+  case ValueType::Keyword:
+  case ValueType::Symbol:
+  case ValueType::String:
+  case ValueType::List:
+  case ValueType::Vector:
+  case ValueType::Map:
+  case ValueType::Generator:
+  case ValueType::Fn:
+  case ValueType::Stream:
+    return false;
+  default:
+    return true;
+  }
+}
+
+// type functions /////////////////////////////////////////////////////////////
 
 GcString __type__::str(ValueType t) {
   switch (t) {

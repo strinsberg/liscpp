@@ -12,16 +12,18 @@
 namespace liscpp {
 
 class Value;
+class List;
+class Generator;
 class Fn;
+class Stream;
+class Error;
+class GcMapValueCompare;
 
 // Typedefs to use gc_allocator with built in types
-// TODO add these for streams as well???
-// TODO add operator<< overloads for the custom types, which will not have them
-// built into C++
 
 typedef std::vector<Value, gc_allocator<Value>> GcVector;
 
-typedef std::map<Value, Value, std::less<Value>,
+typedef std::map<Value, Value, GcMapValueCompare,
                  gc_allocator<std::pair<const Value, Value>>>
     GcMap;
 
@@ -35,6 +37,30 @@ typedef std::basic_ostringstream<char, std::char_traits<char>,
 typedef std::basic_istringstream<char, std::char_traits<char>,
                                  gc_allocator<char>>
     GcIsStream;
+
+// GcMap needs a custom comparator to organize value types properly when they
+// have the same and different types.
+
+class GcMapValueCompare {
+public:
+  bool operator()(const Value &, const Value &) const;
+
+private:
+  bool compare_bool(bool, const Value &) const;
+  bool compare_int(int64_t, const Value &) const;
+  bool compare_float(double, const Value &) const;
+  bool compare_char(char, const Value &) const;
+  bool compare_keyword(GcString *, const Value &) const;
+  bool compare_symbol(GcString *, const Value &) const;
+  bool compare_string(GcString *, const Value &) const;
+  bool compare_list(List *, const Value &) const;
+  bool compare_vector(GcVector *, const Value &) const;
+  bool compare_map(GcMap *, const Value &) const;
+  bool compare_generator(Generator *, const Value &) const;
+  bool compare_fn(Fn *, const Value &) const;
+  bool compare_stream(Stream *, const Value &) const;
+  bool compare_error(Error *, const Value &) const;
+};
 
 // Type enums for types using unions //////////////////////////////////////////
 

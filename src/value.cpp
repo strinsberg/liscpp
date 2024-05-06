@@ -52,69 +52,6 @@ bool Value::operator==(const Value &other) const {
   return false; // unreachable
 }
 
-bool Value::operator<(const Value &other) const {
-  switch (m_type) {
-  case ValueType::Bool:
-    if (other.is_bool()) {
-      return as_bool() < other.as_bool();
-    }
-    break;
-  case ValueType::Char:
-    if (other.is_char()) {
-      return as_char() < other.as_char();
-    }
-    break;
-  case ValueType::Int:
-    if (other.is_int()) {
-      return as_int() < other.as_int();
-    }
-    break;
-  case ValueType::Float:
-    if (other.is_float()) {
-      return as_float() < other.as_float();
-    }
-    break;
-  case ValueType::Keyword:
-    if (other.is_keyword()) {
-      return *as_keyword() < *other.as_keyword();
-    }
-    break;
-  case ValueType::Symbol:
-    if (other.is_symbol()) {
-      return *as_symbol() < *other.as_symbol();
-    }
-    break;
-  case ValueType::String:
-    if (other.is_string()) {
-      return *as_string() < *other.as_string();
-    }
-    break;
-  case ValueType::List:
-    if (other.is_list()) {
-      return *as_list() < *other.as_list();
-    }
-    break;
-  case ValueType::Vector:
-    if (other.is_vector()) {
-      return *as_vector() < *other.as_vector();
-    }
-    break;
-  case ValueType::Map:
-    if (other.is_map()) {
-      return *as_map() < *other.as_map();
-    }
-    break;
-  case ValueType::Nil:
-  case ValueType::Generator:
-  case ValueType::Fn:
-  case ValueType::Stream:
-  case ValueType::Error:
-    break;
-  }
-  util::panic("bad comparisson in Value::operator<");
-  return false; // unreachable
-}
-
 // Representations ////////////////////////////////////////////////////////////
 
 void Value::code_rep(std::ostream &os) const {
