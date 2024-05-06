@@ -668,4 +668,29 @@ TEST(TypeGcMapComparator, test_error_comparissons) {
 
 // Type functions /////////////////////////////////////////////////////////////
 
+// These are all representation functions so I am going to leave them untested
+// for now so that I can still change them if I want. It is a lot of work to
+// test these types of functions and they are the most likely to change.
+
 // Operator<< /////////////////////////////////////////////////////////////////
+
+TEST(OstreamOperator, gc_string_displays_like_lisp_vector) {
+  GcString str("hello \"me\"");
+  GcOsStream oss;
+  oss << str;
+  EXPECT_EQ(oss.str(), GcString("hello \"me\""));
+}
+
+TEST(OstreamOperator, gc_vector_displays_like_lisp_vector) {
+  GcVector vec{Value(true), Value()};
+  GcOsStream oss;
+  oss << vec;
+  EXPECT_EQ(oss.str(), GcString("[true nil]"));
+}
+
+TEST(OstreamOperator, gc_map_displays_like_lisp_vector) {
+  GcMap map{{Value(), Value(false)}, {Value(true), Value()}};
+  GcOsStream oss;
+  oss << map;
+  EXPECT_EQ(oss.str(), GcString("{nil false true nil}"));
+}

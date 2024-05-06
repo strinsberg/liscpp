@@ -47,9 +47,9 @@ public:
 
 private:
   bool compare_bool(bool, const Value &) const;
+  bool compare_char(char, const Value &) const;
   bool compare_int(int64_t, const Value &) const;
   bool compare_float(double, const Value &) const;
-  bool compare_char(char, const Value &) const;
   bool compare_keyword(GcString *, const Value &) const;
   bool compare_symbol(GcString *, const Value &) const;
   bool compare_string(GcString *, const Value &) const;
