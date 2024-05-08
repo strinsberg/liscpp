@@ -14,6 +14,8 @@ Value __value__::new_nil() { return Value(); }
 
 Value __value__::new_bool(bool b) { return Value(b); }
 
+Value __value__::new_char(char ch) { return Value(ch); }
+
 Value __value__::new_int(int64_t i) { return Value(i); }
 
 Value __value__::new_float(double d) { return Value(d); }
@@ -34,7 +36,9 @@ Value __value__::new_string(const char *s) {
 
 Value __value__::new_symbol(GcString *s) { return Value(ValueType::Symbol, s); }
 
-Value __value__::new_keyword(GcString *s) { return Value(ValueType::Keyword, s); }
+Value __value__::new_keyword(GcString *s) {
+  return Value(ValueType::Keyword, s);
+}
 
 Value __value__::new_string(GcString *s) { return Value(ValueType::String, s); }
 
@@ -69,23 +73,25 @@ Value __value__::new_fn(const char *name, Value (*f)(Value, Value, Value)) {
   return Value(new Fn(new GcString(name), f));
 }
 
-Value __value__::new_fn(const char *name, Value (*f)(Value, Value, Value, Value)) {
+Value __value__::new_fn(const char *name,
+                        Value (*f)(Value, Value, Value, Value)) {
   return Value(new Fn(new GcString(name), f));
 }
 
-Value __value__::new_fn(const char *name, Value (*f)(Value, Value, Value, Value, Value)) {
+Value __value__::new_fn(const char *name,
+                        Value (*f)(Value, Value, Value, Value, Value)) {
   return Value(new Fn(new GcString(name), f));
 }
 
 Value __value__::new_fn(const char *name, uint32_t arity,
-             Value (*f)(const Value args[], uint32_t n)) {
+                        Value (*f)(const Value args[], uint32_t n)) {
   return Value(new Fn(new GcString(name), arity, f));
 }
 
-Value __value__::new_closure(const char *name, GcVector captures, uint32_t arity,
-                  Value (*fn)(GcVector *, const Value[], uint32_t)) {
-  return Value(
-      new Fn(new GcString(name), new GcVector{std::move(captures)}, arity, fn));
+Value __value__::new_closure(const char *name, GcVector *captures,
+                             uint32_t arity,
+                             Value (*fn)(GcVector *, const Value[], uint32_t)) {
+  return Value(new Fn(new GcString(name), captures, arity, fn));
 }
 
 // Stream
@@ -94,9 +100,13 @@ Value __value__::new_stream(std::istream *is) { return Value(new Stream(is)); }
 
 Value __value__::new_stream(std::ostream *os) { return Value(new Stream(os)); }
 
-Value __value__::new_stream(std::ifstream *ifs) { return Value(new Stream(ifs)); }
+Value __value__::new_stream(std::ifstream *ifs) {
+  return Value(new Stream(ifs));
+}
 
-Value __value__::new_stream(std::ofstream *ofs) { return Value(new Stream(ofs)); }
+Value __value__::new_stream(std::ofstream *ofs) {
+  return Value(new Stream(ofs));
+}
 
 Value __value__::new_stream(Stream *s) { return Value(s); }
 

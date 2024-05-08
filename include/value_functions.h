@@ -41,6 +41,7 @@ namespace __value__ {
 // Primitives
 Value new_nil();
 Value new_bool(bool);
+Value new_char(char);
 Value new_int(int64_t);
 Value new_float(double);
 
@@ -67,7 +68,7 @@ Value new_fn(const char *, Value (*)(Value, Value, Value));
 Value new_fn(const char *, Value (*)(Value, Value, Value, Value));
 Value new_fn(const char *, Value (*)(Value, Value, Value, Value, Value));
 Value new_fn(const char *, uint32_t, Value (*)(const Value[], uint32_t));
-Value new_closure(const char *, GcVector, uint32_t,
+Value new_closure(const char *, GcVector *, uint32_t,
                   Value(GcVector *, const Value[], uint32_t));
 
 // Stream
