@@ -87,5 +87,4 @@ Value new_error(Error *);
 
 } // namespace liscpp
 
-
 #endif

@@ -40,6 +40,8 @@ namespace __error__ {
 Error *new_arity_error(GcString *where, uint32_t expected, uint32_t actual);
 Error *new_invalid_arg_error(GcString *where, uint32_t pos, ValueType expected,
                              ValueType actual);
+Error *new_invalid_arg_error(GcString *where, uint32_t pos, ValueType expected,
+                             ValueType actual);
 Error *new_file_error(GcString *where, FileOp type);
 Error *new_io_error(GcString *where, Value stream);
 
