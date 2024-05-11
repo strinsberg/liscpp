@@ -71,6 +71,7 @@ enum class ValueType {
   Char,
   Int,
   Float,
+  Number, // Primarily for errors etc.
   // String
   Symbol,
   Keyword,
@@ -122,7 +123,20 @@ enum class ErrorType {
   IO,
 };
 
-// Type Functions and Ostream Overloads ///////////////////////////////////////
+// ostream overloads //////////////////////////////////////////////////////////
+  
+std::ostream &operator<<(std::ostream &, const liscpp::GcString &);
+std::ostream &operator<<(std::ostream &, const liscpp::GcVector &);
+std::ostream &operator<<(std::ostream &, const liscpp::GcMap &);
+
+std::ostream &operator<<(std::ostream &, const liscpp::ValueType &);
+std::ostream &operator<<(std::ostream &, const liscpp::FnType &);
+std::ostream &operator<<(std::ostream &, const liscpp::StreamType &);
+std::ostream &operator<<(std::ostream &, const liscpp::FileOp &);
+std::ostream &operator<<(std::ostream &, const liscpp::ErrorType &);
+
+
+// Type display helpers ///////////////////////////////////////////////////////
 
 namespace __type__ {
 
@@ -143,15 +157,5 @@ void display_rep(std::ostream &, const GcMap &);
 } // namespace __type__
 
 } // namespace liscpp
-
-std::ostream &operator<<(std::ostream &, const liscpp::GcString &);
-std::ostream &operator<<(std::ostream &, const liscpp::GcVector &);
-std::ostream &operator<<(std::ostream &, const liscpp::GcMap &);
-
-std::ostream &operator<<(std::ostream &, const liscpp::ValueType &);
-std::ostream &operator<<(std::ostream &, const liscpp::FnType &);
-std::ostream &operator<<(std::ostream &, const liscpp::StreamType &);
-std::ostream &operator<<(std::ostream &, const liscpp::FileOp &);
-std::ostream &operator<<(std::ostream &, const liscpp::ErrorType &);
 
 #endif

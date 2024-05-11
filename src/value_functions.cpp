@@ -116,7 +116,7 @@ Value __value__::new_error(Error *e) { return Value(e); }
 
 // Ostream overload
 
-std::ostream &operator<<(std::ostream &os, const Value &value) {
+std::ostream &liscpp::operator<<(std::ostream &os, const Value &value) {
   value.display_rep(os);
   return os;
 }

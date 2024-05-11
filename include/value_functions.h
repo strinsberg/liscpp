@@ -35,6 +35,8 @@
 
 namespace liscpp {
 
+std::ostream &operator<<(std::ostream &os, const liscpp::Value &value);
+
 namespace __value__ {
 // Value Constructors //
 
@@ -85,6 +87,5 @@ Value new_error(Error *);
 
 } // namespace liscpp
 
-std::ostream &operator<<(std::ostream &os, const liscpp::Value &value);
 
 #endif

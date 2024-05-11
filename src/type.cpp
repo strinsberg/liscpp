@@ -306,6 +306,50 @@ bool GcMapValueCompare::compare_error(Error *a, const Value &b) const {
   }
 }
 
+// Overload ostream ///////////////////////////////////////////////////////////
+
+std::ostream &liscpp::operator<<(std::ostream &os, const liscpp::GcString &s) {
+  // NOTE since this is the operator that outputs GcString
+  // you cannot pass the parameter s or it will infinite loop.
+  os << s.c_str();
+  return os;
+}
+
+std::ostream &liscpp::operator<<(std::ostream &os, const liscpp::GcVector &v) {
+  __type__::display_rep(os, v);
+  return os;
+}
+
+std::ostream &liscpp::operator<<(std::ostream &os, const liscpp::GcMap &m) {
+  __type__::display_rep(os, m);
+  return os;
+}
+
+std::ostream &liscpp::operator<<(std::ostream &os, const ValueType &type) {
+  os << __type__::str(type);
+  return os;
+}
+
+std::ostream &liscpp::operator<<(std::ostream &os, const FnType &type) {
+  os << __type__::str(type);
+  return os;
+}
+
+std::ostream &liscpp::operator<<(std::ostream &os, const StreamType &type) {
+  os << __type__::str(type);
+  return os;
+}
+
+std::ostream &liscpp::operator<<(std::ostream &os, const ErrorType &type) {
+  os << __type__::str(type);
+  return os;
+}
+
+std::ostream &liscpp::operator<<(std::ostream &os, const FileOp &type) {
+  os << __type__::str(type);
+  return os;
+}
+
 // type functions /////////////////////////////////////////////////////////////
 
 GcString __type__::str(ValueType t) {
@@ -320,6 +364,8 @@ GcString __type__::str(ValueType t) {
     return "#t:int";
   case ValueType::Float:
     return "#t:float";
+  case ValueType::Number:
+    return "#t:number";
   case ValueType::Symbol:
     return "#t:symbol";
   case ValueType::Keyword:
@@ -500,46 +546,3 @@ void __type__::display_rep(std::ostream &os, const GcMap &m) {
   os << "}";
 }
 
-// Overload ostream ///////////////////////////////////////////////////////////
-
-std::ostream &operator<<(std::ostream &os, const liscpp::GcString &s) {
-  // NOTE since this is the operator that outputs GcString
-  // you cannot pass the parameter s or it will infinite loop.
-  os << s.c_str();
-  return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const liscpp::GcVector &v) {
-  __type__::display_rep(os, v);
-  return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const liscpp::GcMap &m) {
-  __type__::display_rep(os, m);
-  return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const ValueType &type) {
-  os << __type__::str(type);
-  return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const FnType &type) {
-  os << __type__::str(type);
-  return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const StreamType &type) {
-  os << __type__::str(type);
-  return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const ErrorType &type) {
-  os << __type__::str(type);
-  return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const FileOp &type) {
-  os << __type__::str(type);
-  return os;
-}
